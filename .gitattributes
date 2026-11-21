@@ -1,0 +1,3 @@
+# LF everywhere, also on Windows checkouts: the XML fixtures are compared byte for byte.
+* text=auto eol=lf
+*.png binary
