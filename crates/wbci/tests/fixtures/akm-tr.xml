@@ -1,0 +1,36 @@
+<env:annehmenMeldungRequest xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:am="http://www.vatm.de/wbci/v1/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </Control>
+  <Meldung xsi:type="am:MeldungAKM_TRType">
+    <Absender>
+      <CarrierCode>DEU.EKP1</CarrierCode>
+    </Absender>
+    <VorabstimmungsIdRef>DEU.EKP1.V000000013</VorabstimmungsIdRef>
+    <Position xsi:type="am:MeldungsPositionAKM_TRType">
+      <Meldungscode>8010</Meldungscode>
+      <Meldungstext>Antwort des aufnehmenden Anbieters</Meldungstext>
+    </Position>
+    <Endkundenvertragspartner>
+      <EKPauf>
+        <CarrierCode>DEU.EKP1</CarrierCode>
+      </EKPauf>
+      <EKPabg>
+        <CarrierCode>DEU.EKP2</CarrierCode>
+      </EKPabg>
+    </Endkundenvertragspartner>
+    <Geschaeftsfall>VA-KUE-MRN</Geschaeftsfall>
+    <Ressourcenuebernahme>true</Ressourcenuebernahme>
+    <UebernahmeLeitung>
+      <LineID>DEU.EKP2.1754639821</LineID>
+    </UebernahmeLeitung>
+    <SichererHafen>false</SichererHafen>
+    <PortierungskennungPKIauf>D001</PortierungskennungPKIauf>
+  </Meldung>
+</env:annehmenMeldungRequest>

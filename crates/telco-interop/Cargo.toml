@@ -1,0 +1,39 @@
+[package]
+name         = "telco-interop"
+version.workspace = true
+description  = "The German telecom carrier interfaces in one dependency: WBCI (the § 59 TKG provider switch) and S/PRI (open-access orders), re-exported behind features, with the types they share."
+keywords     = ["telecom", "wbci", "spri", "carrier", "tkg"]
+categories   = ["encoding", "parser-implementations", "network-programming"]
+readme       = "README.md"
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[features]
+default = ["wbci", "spri"]
+## WBCI 2.0: provider ↔ provider, the § 59 TKG switch and number porting.
+wbci = ["dep:wbci"]
+## S/PRI 4.x: service provider ↔ network owner, open-access orders.
+spri = ["dep:spri"]
+## The `telco-interop` command line (read, check, code, timeline): `cargo install telco-interop --features cli`.
+## Pulls clap; the library itself stays sans-I/O, all I/O lives in the binary.
+cli = ["wbci", "spri", "dep:clap"]
+
+[dependencies]
+carrier-core = { workspace = true }
+spri         = { workspace = true, optional = true }
+wbci         = { workspace = true, optional = true }
+clap         = { workspace = true, optional = true }
+
+[[bin]]
+name              = "telco-interop"
+path              = "src/bin/telco-interop/main.rs"
+required-features = ["cli"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[lints]
+workspace = true

@@ -1,0 +1,45 @@
+[workspace]
+# MSRV-aware resolution; a virtual workspace does not inherit the edition default.
+resolver = "3"
+members  = ["crates/*"]
+
+[workspace.package]
+# One version for every crate: they are released together (see .github/workflows/release.yml).
+version      = "0.1.0"
+edition      = "2024"
+rust-version = "1.88"
+authors      = ["hupe1980"]
+license      = "MIT OR Apache-2.0"
+repository   = "https://github.com/hupe1980/telco-interop"
+
+[workspace.dependencies]
+# The workspace's own crates; their version is the workspace version above.
+carrier-core = { path = "crates/carrier-core", version = "=0.1.0" }
+wbci         = { path = "crates/wbci", version = "=0.1.0" }
+spri         = { path = "crates/spri", version = "=0.1.0" }
+# Pull parser and writer; DTDs are refused by our reader, entities are never expanded.
+quick-xml = "0.42"
+# Civil dates and timestamps; Europe/Berlin is compiled in (`static`), so no system
+# time-zone database is read at run time.
+jiff      = { version = "1", default-features = false, features = ["std", "static"] }
+thiserror = "2"
+proptest  = "1"
+# Argument parsing for the command line only (telco-interop, feature `cli`); no colours, no suggestions.
+clap      = { version = "4.6", default-features = false, features = ["std", "derive", "help", "usage", "error-context"] }
+
+# Carrier interfaces parse untrusted input from other operators: a strict floor.
+[workspace.lints.rust]
+unsafe_code                   = "forbid"
+missing_docs                  = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub               = "warn"
+rust_2018_idioms              = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+pedantic         = { level = "warn", priority = -1 }
+indexing_slicing = "warn"
+unwrap_used      = "warn"
+expect_used      = "warn"
+panic            = "warn"
+# `assert!(v.is_empty())` reads better than `assert_eq!(v, [])` and prints the value on failure anyway.
+assert_is_empty  = "allow"

@@ -22,3 +22,23 @@ rustc-ice-*.txt
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Internal design notes, research and the local library of the sources they cite
+# (see concepts/README.md). The AK S&P's S/PRI and WBCI documents are copyrighted:
+# they live under concepts/reference/ and are never committed or published.
+/concepts/
+
+# Local Spec Kit planning and the agent configuration beside it, matching eebus,
+# edifact and sepa: one specs/NNN-slug/ per roadmap item, the constitution and the
+# /speckit-* skills.
+/specs/
+/.specify/
+/.claude/
+
+# Bug reports / feature requests for sibling crates — internal, sent to their maintainers.
+/FEEDBACK_*.md
+
+.DS_Store
+
+# Zola build output
+/site/public/

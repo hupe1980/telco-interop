@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block jsonld %}{% set headline = section.title %}{% set desc = section.description %}{% if section.path != "/docs/" %}{% set crumb_section = section %}{% else %}{% set crumb_section = false %}{% endif %}{% set crumb_page = false %}{% include "_jsonld_doc.html" %}{% endblock %}
+{% block content %}
+<div class="wrap docs-layout">
+  {% include "_sidebar.html" %}
+  <article class="prose doc">
+    {% if section.path != "/docs/" %}
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ get_url(path='@/docs/_index.md') | safe }}">Docs</a></li>
+        <li><span aria-current="page">{{ section.title }}</span></li>
+      </ol>
+    </nav>
+    {% endif %}
+    <h1>{{ section.extra.h1 | default(value=section.title) }}</h1>
+    {% if section.description %}<p class="lede">{{ section.description }}</p>{% endif %}
+    {{ section.content | safe }}
+    {% if section.path == "/docs/" %}
+      {% for sp in config.extra.docs_sections %}
+      {%- set s = get_section(path=sp) %}
+      <h2 id="{{ s.title | slugify }}"><a href="{{ s.permalink | safe }}">{{ s.title }}</a></h2>
+      <ul class="cards">
+        {% for p in s.pages %}
+        <li><a href="{{ p.permalink | safe }}"><strong>{{ p.title }}</strong><span>{{ p.description }}</span></a></li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+    {% elif section.pages %}
+    <ul class="cards">
+      {% for p in section.pages %}
+      <li><a href="{{ p.permalink | safe }}"><strong>{{ p.title }}</strong><span>{{ p.description }}</span></a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}

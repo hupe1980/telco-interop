@@ -1,0 +1,20 @@
+<env:annehmenMeldungResponse xmlns:env="http://spri.telekom.de/oss/v4/envelope">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <quittung>
+    <meldungsTyp>TEQ</meldungsTyp>
+    <meldungspositionen>
+      <position>
+        <meldungscode>0995</meldungscode>
+        <meldungstext>Datenstruktur unzulässig.</meldungstext>
+      </position>
+    </meldungspositionen>
+  </quittung>
+</env:annehmenMeldungResponse>

@@ -1,0 +1,28 @@
+<env:annehmenAnfrageRequest xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:ar="http://www.vatm.de/wbci/v1/request" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </Control>
+  <Anfrage xsi:type="ar:StornoAufhebungEKPaufType">
+    <Absender>
+      <CarrierCode>DEU.EKP1</CarrierCode>
+    </Absender>
+    <Endkundenvertragspartner>
+      <EKPauf>
+        <CarrierCode>DEU.EKP1</CarrierCode>
+      </EKPauf>
+      <EKPabg>
+        <CarrierCode>DEU.EKP2</CarrierCode>
+      </EKPabg>
+    </Endkundenvertragspartner>
+    <StornoId>DEU.EKP1.S000000001</StornoId>
+    <VorabstimmungsDaten>
+      <VorabstimmungsIdRef>DEU.EKP1.V000000013</VorabstimmungsIdRef>
+    </VorabstimmungsDaten>
+  </Anfrage>
+</env:annehmenAnfrageRequest>

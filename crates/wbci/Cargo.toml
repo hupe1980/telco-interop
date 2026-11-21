@@ -1,0 +1,25 @@
+[package]
+name         = "wbci"
+version.workspace = true
+description  = "WBCI 2.0 (WITA Based Carrier Interface, AK S&P) for Rust: typed, sans-I/O requests and messages of the German § 59 TKG provider switch, XML read and write, cited validation, explained working-day deadlines and the process state machine."
+keywords     = ["wbci", "telecom", "tkg", "number-porting", "carrier"]
+categories   = ["encoding", "parser-implementations", "network-programming"]
+readme       = "README.md"
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[dependencies]
+# First-party: the foundation shared with spri.
+carrier-core = { workspace = true }
+quick-xml    = { workspace = true }
+jiff         = { workspace = true }
+thiserror    = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[lints]
+workspace = true

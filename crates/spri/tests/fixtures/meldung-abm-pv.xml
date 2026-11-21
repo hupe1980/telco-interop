@@ -1,0 +1,38 @@
+<env:annehmenMeldungRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:message="http://spri.telekom.de/oss/v4/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <meldung>
+    <auftragstyp>
+      <geschaeftsfall>PV</geschaeftsfall>
+      <aenderungsKennzeichen>Standard</aenderungsKennzeichen>
+      <geschaeftsfallart>Endkundenanbieterwechsel</geschaeftsfallart>
+    </auftragstyp>
+    <meldungstyp xsi:type="message:MeldungstypABM-PVType">
+      <meldungsattribute>
+        <vertragsnummer>V999</vertragsnummer>
+        <externeAuftragsnummer>A-2026-0001</externeAuftragsnummer>
+        <auftraggebernummer>0815</auftraggebernummer>
+        <anschluss>
+          <lineId>DEU.NB01.1754639821</lineId>
+        </anschluss>
+        <aufnehmenderProvider>
+          <providername>Neuer Anbieter AG</providername>
+          <uebernahmedatumVerbindlich>2027-01-15</uebernahmedatumVerbindlich>
+        </aufnehmenderProvider>
+      </meldungsattribute>
+      <meldungspositionen>
+        <position>
+          <meldungscode>0030</meldungscode>
+          <meldungstext>Der Anbieterwechsel erfolgt zum angegebenen Termin.</meldungstext>
+        </position>
+      </meldungspositionen>
+    </meldungstyp>
+  </meldung>
+</env:annehmenMeldungRequest>

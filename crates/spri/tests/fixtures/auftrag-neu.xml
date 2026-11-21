@@ -1,0 +1,168 @@
+<env:annehmenAuftragRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:order="http://spri.telekom.de/oss/v4/order" xmlns:fttx="http://spri.telekom.de/oss/v4/fttx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <auftrag>
+    <externeAuftragsnummer>A-2026-0001</externeAuftragsnummer>
+    <auftraggeber>
+      <auftraggebernummer>4711</auftraggebernummer>
+      <leistungsnummer>RV-1</leistungsnummer>
+    </auftraggeber>
+    <besteller>
+      <auftraggebernummer>4712</auftraggebernummer>
+      <leistungsnummer>RV-2</leistungsnummer>
+    </besteller>
+    <geschaeftsfall xsi:type="order:BereitstellungType">
+      <vorabstimmungId>DEU.EKP1.V000000013</vorabstimmungId>
+      <anlage>
+        <dateiname>Kuendigung Mustermann.pdf</dateiname>
+        <dateityp>application/pdf</dateityp>
+        <beschreibung>Kündigungsschreiben</beschreibung>
+        <inhalt>JVBERi0xLjQKJSBzeW50aGV0aWMgdGVzdCBkb2N1bWVudAo=</inhalt>
+        <anlagentyp>Kuendigungsschreiben</anlagentyp>
+      </anlage>
+      <ansprechpartner>
+        <auftragsmanagement>
+          <anrede>1</anrede>
+          <vorname>Max</vorname>
+          <nachname>Beispiel</nachname>
+          <telefonnummer>030 1234567</telefonnummer>
+          <mobilfunknummer>+49 171 7654321</mobilfunknummer>
+          <faxnummer>030 1234568</faxnummer>
+          <emailadresse>max.beispiel@example.de</emailadresse>
+        </auftragsmanagement>
+        <ansprechpartner>
+          <anrede>1</anrede>
+          <vorname>Max</vorname>
+          <nachname>Beispiel</nachname>
+          <telefonnummer>030 1234567</telefonnummer>
+          <mobilfunknummer>+49 171 7654321</mobilfunknummer>
+          <faxnummer>030 1234568</faxnummer>
+          <emailadresse>max.beispiel@example.de</emailadresse>
+          <rolle>Technik</rolle>
+        </ansprechpartner>
+      </ansprechpartner>
+      <termine>
+        <auftraggeberWunschtermin>
+          <datum>2027-01-15</datum>
+          <zeitfenster>1</zeitfenster>
+        </auftraggeberWunschtermin>
+      </termine>
+      <auftragsposition>
+        <produkt xsi:type="fttx:ProduktFTTXType">
+          <bezeichner>FTTH 1000</bezeichner>
+        </produkt>
+        <geschaeftsfallProdukt xsi:type="fttx:FTTXBereitstellungType">
+          <standortA>
+            <person>
+              <anrede>2</anrede>
+              <vorname>Erika</vorname>
+              <nachname>Mustermann</nachname>
+              <telefonnummer>030 9876543</telefonnummer>
+            </person>
+            <strasse>
+              <strassenname>Hauptstraße</strassenname>
+              <hausnummer>12</hausnummer>
+              <hausnummernZusatz>a</hausnummernZusatz>
+            </strasse>
+            <gebaeudeteil>
+              <gebaeudeteilName>Haus B</gebaeudeteilName>
+              <gebaeudeteilZusatz>Hinterhof</gebaeudeteilZusatz>
+            </gebaeudeteil>
+            <land>de</land>
+            <postleitzahl>10115</postleitzahl>
+            <ort>
+              <ortsname>Berlin</ortsname>
+              <ortsteil>Mitte</ortsteil>
+            </ort>
+            <lageTAE_ONT>Flur, links</lageTAE_ONT>
+          </standortA>
+          <standortVersand>
+            <firma>
+              <anrede>4</anrede>
+              <firmenname>Beispiel GmbH</firmenname>
+              <firmennameZweiterTeil>&amp; Co. KG</firmennameZweiterTeil>
+            </firma>
+            <strasse>
+              <strassenname>Hauptstraße</strassenname>
+              <hausnummer>12</hausnummer>
+              <hausnummernZusatz>a</hausnummernZusatz>
+            </strasse>
+            <postleitzahl>10117</postleitzahl>
+            <ort>
+              <ortsname>Berlin</ortsname>
+            </ort>
+          </standortVersand>
+          <vormieter>
+            <person>
+              <nachname>Vormann</nachname>
+            </person>
+            <homeId>
+              <homeIdNummer>HID0001</homeIdNummer>
+            </homeId>
+            <seriennummerONT>ONT-0001</seriennummerONT>
+          </vormieter>
+          <montageleistung>
+            <ansprechpartner>
+              <anrede>1</anrede>
+              <vorname>Max</vorname>
+              <nachname>Beispiel</nachname>
+              <telefonnummer>030 1234567</telefonnummer>
+              <mobilfunknummer>+49 171 7654321</mobilfunknummer>
+              <faxnummer>030 1234568</faxnummer>
+              <emailadresse>max.beispiel@example.de</emailadresse>
+            </ansprechpartner>
+            <montagehinweis>Bitte vorher anrufen</montagehinweis>
+          </montageleistung>
+          <witaVertragsnummer>W123</witaVertragsnummer>
+          <technologie>FTTH</technologie>
+          <bestandssuche>
+            <onkz>30</onkz>
+            <rufnummer>1234567</rufnummer>
+          </bestandssuche>
+          <rufnummernPortierung>
+            <einzelanschluss>
+              <rufnummernliste>
+                <zuPortierendeOnkzRnr>
+                  <onkz>30</onkz>
+                  <rufnummer>1234567</rufnummer>
+                </zuPortierendeOnkzRnr>
+              </rufnummernliste>
+            </einzelanschluss>
+            <portierungskenner>D123</portierungskenner>
+          </rufnummernPortierung>
+          <abgebenderEKP>true</abgebenderEKP>
+        </geschaeftsfallProdukt>
+        <position>
+          <produkt xsi:type="fttx:ProduktFTTXType">
+            <bezeichner>Router</bezeichner>
+          </produkt>
+        </position>
+        <position>
+          <produkt xsi:type="fttx:ProduktFTTXType">
+            <bezeichner>Montage</bezeichner>
+          </produkt>
+        </position>
+      </auftragsposition>
+    </geschaeftsfall>
+    <geschaeftsfallArt>Bereitstellung</geschaeftsfallArt>
+    <aenderungskennzeichen>Standard</aenderungskennzeichen>
+    <terminNeu>2027-01-20</terminNeu>
+    <kenner>
+      <projektId>
+        <projektkenner>P-1</projektkenner>
+        <kopplungskenner>K-1</kopplungskenner>
+      </projektId>
+      <auftragskenner>
+        <auftragsklammer>9999999999</auftragsklammer>
+        <anzahlAuftraege>2</anzahlAuftraege>
+      </auftragskenner>
+    </kenner>
+  </auftrag>
+</env:annehmenAuftragRequest>

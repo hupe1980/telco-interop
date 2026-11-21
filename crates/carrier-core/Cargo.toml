@@ -1,0 +1,18 @@
+[package]
+name         = "carrier-core"
+version.workspace = true
+description  = "The foundation of the telco-interop crates wbci and spri: schema facets, carrier ids, the German working-day calendar, explained deadline arithmetic and a hardened XML reader and writer. Used through wbci and spri."
+readme       = "README.md"
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[dependencies]
+quick-xml = { workspace = true }
+jiff      = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

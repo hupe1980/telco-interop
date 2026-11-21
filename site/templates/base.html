@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#7a2e8f" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1216" media="(prefers-color-scheme: dark)">
+
+{%- set cp = current_path | default(value="") -%}
+{%- set is_home = cp == "/" -%}
+{%- if is_home -%}
+  {%- set page_title = section.extra.seo_title | default(value=config.title) -%}
+  {%- set page_desc = section.description | default(value=config.description) -%}
+{%- elif page is defined -%}
+  {%- set page_title = page.extra.seo_title | default(value=page.title ~ " · telco-interop") -%}
+  {%- set page_desc = page.description | default(value=config.description) -%}
+{%- elif section is defined and section.title -%}
+  {%- set page_title = section.extra.seo_title | default(value=section.title ~ " · telco-interop") -%}
+  {%- set page_desc = section.description | default(value=config.description) -%}
+{%- else -%}
+  {%- set page_title = config.title -%}
+  {%- set page_desc = config.description -%}
+{%- endif -%}
+{%- set canonical = current_url | default(value="") -%}
+{%- set og_image = get_url(path="og.png") -%}
+
+<title>{{ page_title }}</title>
+<meta name="description" content="{{ page_desc }}">
+<meta name="author" content="{{ config.author }}">
+{%- if canonical %}
+<link rel="canonical" href="{{ canonical | safe }}">
+{%- endif %}
+{% block robots %}<meta name="robots" content="index, follow, max-image-preview:large">{% endblock %}
+
+<meta property="og:type" content="{% block og_type %}website{% endblock %}">
+<meta property="og:site_name" content="telco-interop">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="{{ page_title }}">
+<meta property="og:description" content="{{ page_desc }}">
+{%- if canonical %}
+<meta property="og:url" content="{{ canonical | safe }}">
+{%- endif %}
+<meta property="og:image" content="{{ og_image | safe }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="telco-interop: WBCI and S/PRI, the German provider switch, in Rust">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page_title }}">
+<meta name="twitter:description" content="{{ page_desc }}">
+<meta name="twitter:image" content="{{ og_image | safe }}">
+
+<link rel="icon" href="{{ get_url(path='favicon.svg') | safe }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ get_url(path='style.css') | safe }}">
+<link rel="sitemap" type="application/xml" href="{{ get_url(path='sitemap.xml') | safe }}">
+
+{% block jsonld %}{% endblock %}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="{{ get_url(path='@/_index.md') | safe }}" aria-label="telco-interop home">
+      <img src="{{ get_url(path='favicon.svg') | safe }}" alt="" width="28" height="28">
+      <span>telco-interop</span>
+    </a>
+    <nav class="topnav" aria-label="Main">
+      <a href="{{ get_url(path='@/docs/_index.md') | safe }}"{% if cp is starting_with(pat="/docs/") %} aria-current="true"{% endif %}>Docs</a>
+      <a href="{{ config.extra.api_url }}">API</a>
+      <a href="{{ config.extra.crate_url }}">crates.io</a>
+      <a href="{{ config.extra.repo }}">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p><strong>telco-interop</strong>: the carrier interfaces of the German telecom market, in Rust.</p>
+      <p class="muted">Unofficial. Not affiliated with or endorsed by the AK S&amp;P, VATM, BUGLAS or Deutsche Telekom.
+      The specifications are referenced for identification only and are not redistributed.</p>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="{{ get_url(path='@/docs/start/getting-started.md') | safe }}">Getting started</a>
+      <a href="{{ get_url(path='@/docs/start/glossary.md') | safe }}">Glossary</a>
+      <a href="{{ get_url(path='@/docs/reference/scope.md') | safe }}">Scope</a>
+      <a href="{{ config.extra.repo }}/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="{{ config.extra.repo }}/security">Security</a>
+      <a href="{{ config.extra.repo }}/blob/main/LICENSE-MIT">MIT</a>
+      <a href="{{ config.extra.repo }}/blob/main/LICENSE-APACHE">Apache-2.0</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

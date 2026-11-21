@@ -1,0 +1,22 @@
+[package]
+name         = "spri"
+version.workspace = true
+description  = "S/PRI 4.x (AK S&P), the German open-access fibre interface, for Rust: typed, sans-I/O orders and all 20 message types, XML read and write against schema 4.00.03, the order lifecycle of Anlage 7 and the 215 message codes."
+keywords     = ["spri", "telecom", "open-access", "ftth", "carrier"]
+categories   = ["encoding", "parser-implementations", "network-programming"]
+readme       = "README.md"
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[dependencies]
+# First-party: the foundation shared with wbci.
+carrier-core = { workspace = true }
+quick-xml    = { workspace = true }
+jiff         = { workspace = true }
+thiserror    = { workspace = true }
+
+[lints]
+workspace = true

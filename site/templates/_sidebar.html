@@ -1,0 +1,17 @@
+<nav class="sidebar" aria-label="Documentation">
+  <details class="sidebar-toggle" open>
+    <summary>Documentation</summary>
+    <ul class="sidebar-root">
+      <li><a href="{{ get_url(path='@/docs/_index.md') | safe }}"{% if current_path == "/docs/" %} aria-current="page"{% endif %}>Overview</a></li>
+    </ul>
+    {% for sp in config.extra.docs_sections %}
+    {%- set s = get_section(path=sp) %}
+    <p class="sidebar-heading"><a href="{{ s.permalink | safe }}"{% if current_path == s.path %} aria-current="page"{% endif %}>{{ s.title }}</a></p>
+    <ul>
+      {% for p in s.pages %}
+      <li><a href="{{ p.permalink | safe }}"{% if current_path == p.path %} aria-current="page"{% endif %}>{{ p.extra.nav | default(value=p.title) }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </details>
+</nav>

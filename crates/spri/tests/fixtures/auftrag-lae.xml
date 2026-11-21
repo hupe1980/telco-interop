@@ -1,0 +1,62 @@
+<env:annehmenAuftragRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:order="http://spri.telekom.de/oss/v4/order" xmlns:fttx="http://spri.telekom.de/oss/v4/fttx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <auftrag>
+    <externeAuftragsnummer>A-2026-0001</externeAuftragsnummer>
+    <auftraggeber>
+      <auftraggebernummer>4711</auftraggebernummer>
+      <leistungsnummer>RV-1</leistungsnummer>
+    </auftraggeber>
+    <geschaeftsfall xsi:type="order:LeistungsaenderungType">
+      <vertragsnummer>V123456</vertragsnummer>
+      <lineId>DEU.NB01.1754639821</lineId>
+      <ansprechpartner>
+        <auftragsmanagement>
+          <anrede>1</anrede>
+          <vorname>Max</vorname>
+          <nachname>Beispiel</nachname>
+          <telefonnummer>030 1234567</telefonnummer>
+          <mobilfunknummer>+49 171 7654321</mobilfunknummer>
+          <faxnummer>030 1234568</faxnummer>
+          <emailadresse>max.beispiel@example.de</emailadresse>
+        </auftragsmanagement>
+        <ansprechpartner>
+          <anrede>1</anrede>
+          <vorname>Max</vorname>
+          <nachname>Beispiel</nachname>
+          <telefonnummer>030 1234567</telefonnummer>
+          <mobilfunknummer>+49 171 7654321</mobilfunknummer>
+          <faxnummer>030 1234568</faxnummer>
+          <emailadresse>max.beispiel@example.de</emailadresse>
+          <rolle>Technik</rolle>
+        </ansprechpartner>
+      </ansprechpartner>
+      <termine>
+        <auftraggeberWunschtermin>
+          <datum>2027-01-15</datum>
+          <zeitfenster>1</zeitfenster>
+        </auftraggeberWunschtermin>
+      </termine>
+      <auftragsposition>
+        <produkt xsi:type="fttx:ProduktFTTXType">
+          <bezeichner>FTTH 500</bezeichner>
+        </produkt>
+        <position>
+          <produkt xsi:type="fttx:ProduktFTTXType">
+            <bezeichner>FTTH 1000</bezeichner>
+          </produkt>
+          <aktionscode>A</aktionscode>
+        </position>
+      </auftragsposition>
+    </geschaeftsfall>
+    <geschaeftsfallArt>Aenderung</geschaeftsfallArt>
+    <aenderungskennzeichen>Standard</aenderungskennzeichen>
+  </auftrag>
+</env:annehmenAuftragRequest>

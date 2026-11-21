@@ -1,0 +1,30 @@
+<env:annehmenMeldungRequest xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:am="http://www.vatm.de/wbci/v1/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </Control>
+  <Meldung xsi:type="am:MeldungABBM_TRType">
+    <Absender>
+      <CarrierCode>DEU.EKP2</CarrierCode>
+    </Absender>
+    <VorabstimmungsIdRef>DEU.EKP1.V000000013</VorabstimmungsIdRef>
+    <Position xsi:type="am:MeldungsPositionABBM_TRType">
+      <Meldungscode>8146</Meldungscode>
+      <Meldungstext>Line ID gehört nicht zur Vorabstimmungs ID</Meldungstext>
+    </Position>
+    <Endkundenvertragspartner>
+      <EKPauf>
+        <CarrierCode>DEU.EKP1</CarrierCode>
+      </EKPauf>
+      <EKPabg>
+        <CarrierCode>DEU.EKP2</CarrierCode>
+      </EKPabg>
+    </Endkundenvertragspartner>
+    <Geschaeftsfall>VA-KUE-MRN</Geschaeftsfall>
+  </Meldung>
+</env:annehmenMeldungRequest>

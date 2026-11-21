@@ -1,0 +1,45 @@
+<env:annehmenAnfrageRequest xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:ar="http://www.vatm.de/wbci/v1/request" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </Control>
+  <Anfrage xsi:type="ar:KuendigungOhneRNPGeschaeftsfallType">
+    <Absender>
+      <CarrierCode>DEU.EKP1</CarrierCode>
+    </Absender>
+    <Endkundenvertragspartner>
+      <EKPauf>
+        <CarrierCode>DEU.EKP1</CarrierCode>
+      </EKPauf>
+      <EKPabg>
+        <CarrierCode>DEU.EKP2</CarrierCode>
+      </EKPabg>
+    </Endkundenvertragspartner>
+    <VorabstimmungsId>DEU.EKP1.V000000014</VorabstimmungsId>
+    <Kundenwunschtermin>2027-01-15</Kundenwunschtermin>
+    <Endkunde>
+      <firma>
+        <anrede>4</anrede>
+        <firmenname>Beispiel GmbH</firmenname>
+      </firma>
+    </Endkunde>
+    <Standort>
+      <strasse>
+        <strassenname>Hauptstraße</strassenname>
+        <hausnummer>12</hausnummer>
+        <hausnummernZusatz>a</hausnummernZusatz>
+      </strasse>
+      <postleitzahl>10115</postleitzahl>
+      <ort>Berlin</ort>
+    </Standort>
+    <Anschlussidentifikation>
+      <ONKZ>30</ONKZ>
+      <rufnummer>7654321</rufnummer>
+    </Anschlussidentifikation>
+  </Anfrage>
+</env:annehmenAnfrageRequest>

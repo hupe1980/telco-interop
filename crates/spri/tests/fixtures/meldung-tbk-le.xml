@@ -1,0 +1,36 @@
+<env:annehmenMeldungRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:message="http://spri.telekom.de/oss/v4/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <meldung>
+    <auftragstyp>
+      <geschaeftsfall>EST</geschaeftsfall>
+      <aenderungsKennzeichen>Standard</aenderungsKennzeichen>
+      <geschaeftsfallart>Entstoerung</geschaeftsfallart>
+    </auftragstyp>
+    <meldungstyp xsi:type="message:MeldungstypTBK-LEType">
+      <meldungsattribute>
+        <vertragsnummer>V123456</vertragsnummer>
+        <externeAuftragsnummer>A-2026-0001</externeAuftragsnummer>
+        <auftraggebernummer>4711</auftraggebernummer>
+        <termin>
+          <datum>2027-01-15</datum>
+          <zeit>09:30:00</zeit>
+          <zeitfenster>1</zeitfenster>
+        </termin>
+      </meldungsattribute>
+      <meldungspositionen>
+        <position>
+          <meldungscode>7039</meldungscode>
+          <meldungstext>Der mit der EST übermittelte Endkundentermin wird voraussichtlich wahrgenommen.</meldungstext>
+        </position>
+      </meldungspositionen>
+    </meldungstyp>
+  </meldung>
+</env:annehmenMeldungRequest>

@@ -1,0 +1,15 @@
+[package]
+name         = "wita-kit"
+version.workspace = true
+description  = "WITA (Deutsche Telekom's wholesale ordering interface) for Rust. A name reservation: nothing is implemented. Unofficial."
+keywords     = ["wita", "telecom", "wholesale", "carrier", "telekom"]
+categories   = ["encoding", "parser-implementations", "network-programming"]
+readme       = "README.md"
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[lints]
+workspace = true

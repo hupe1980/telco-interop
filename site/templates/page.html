@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block og_type %}article{% endblock %}
+{% block jsonld %}{% set parent = get_section(path=page.ancestors | last) %}{% set headline = page.title %}{% set desc = page.description %}{% set crumb_section = parent %}{% set crumb_page = page %}{% include "_jsonld_doc.html" %}{% endblock %}
+{% block content %}
+{%- set parent = get_section(path=page.ancestors | last) -%}
+{#- Previous and next across the sections, in sidebar order. -#}
+{%- set_global prev = "" -%}{%- set_global next = "" -%}{%- set_global found = false -%}{%- set_global last_seen = "" -%}
+{%- for sp in config.extra.docs_sections -%}
+  {%- set s = get_section(path=sp) -%}
+  {%- for p in s.pages -%}
+    {%- if found and next == "" -%}{%- set_global next = p -%}{%- endif -%}
+    {%- if p.path == page.path -%}{%- set_global found = true -%}{%- set_global prev = last_seen -%}{%- endif -%}
+    {%- set_global last_seen = p -%}
+  {%- endfor -%}
+{%- endfor -%}
+<div class="wrap docs-layout">
+  {% include "_sidebar.html" %}
+  <article class="prose doc">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ get_url(path='@/docs/_index.md') | safe }}">Docs</a></li>
+        <li><a href="{{ parent.permalink | safe }}">{{ parent.title }}</a></li>
+        <li><span aria-current="page">{{ page.extra.nav | default(value=page.title) }}</span></li>
+      </ol>
+    </nav>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}<p class="lede">{{ page.description }}</p>{% endif %}
+    {% if page.toc | length > 1 %}
+    <details class="toc"><summary>On this page</summary>
+      <ul>{% for h in page.toc %}<li><a href="{{ h.permalink | safe }}">{{ h.title }}</a></li>{% endfor %}</ul>
+    </details>
+    {% endif %}
+    {{ page.content | safe }}
+    <nav class="pager" aria-label="Previous and next page">
+      {% if prev != "" %}<a class="pager-prev" href="{{ prev.permalink | safe }}" rel="prev"><span>Previous</span>{{ prev.title }}</a>{% else %}<span></span>{% endif %}
+      {% if next != "" %}<a class="pager-next" href="{{ next.permalink | safe }}" rel="next"><span>Next</span>{{ next.title }}</a>{% endif %}
+    </nav>
+    <p class="doc-meta">
+      <a href="{{ config.extra.repo }}/edit/main/site/content/{{ page.relative_path }}">Edit this page on GitHub</a>
+      · <a href="{{ config.extra.repo }}/issues/new">Report a mistake</a>
+      · <a href="{{ config.extra.api_url }}">API reference on docs.rs</a>
+    </p>
+  </article>
+</div>
+{% endblock %}

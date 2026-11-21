@@ -1,0 +1,30 @@
+[package]
+name = "wbci-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+wbci = { path = "../crates/wbci" }
+spri = { path = "../crates/spri" }
+
+# Its own workspace: `cargo fuzz` needs nightly and its own flags.
+[workspace]
+
+[[bin]]
+name = "read"
+path = "fuzz_targets/read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "read_spri"
+path = "fuzz_targets/read_spri.rs"
+test = false
+doc = false
+bench = false

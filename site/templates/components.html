@@ -1,0 +1,13 @@
+{#- Components for the docs pages (Zola 0.23 replaced shortcodes with Tera components). -#}
+
+{#- Wrap every ```rust block in {% <rust> %} … {% </rust> %}: the block stays a doctest for
+    rustdoc, and the site drops rustdoc's hidden `# ` lines, which Zola would otherwise show. -#}
+{% component rust() %}{% for line in body | split(pat="
+") %}{% set t = line | trim_start %}{% if t is starting_with(pat="# ") or t == "#" %}{% else %}{{ line | safe }}
+{% endif %}{% endfor %}{% endcomponent rust %}
+
+{#- A callout. kind: "interpretation" (default), "note" or "warning". -#}
+{% component note(title="Interpretation", kind="interpretation") %}<aside class="callout callout-{{ kind }}" role="note"><p class="callout-title">{{ title }}</p>
+
+{{ body | safe }}
+</aside>{% endcomponent note %}

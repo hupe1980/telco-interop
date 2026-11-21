@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block jsonld %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"WebSite","name":"telco-interop","url":{{ config.base_url | json_encode | safe }},"inLanguage":"en"},
+ {"@type":"SoftwareSourceCode",
+  "name":"telco-interop",
+  "description":{{ section.description | json_encode | safe }},
+  "url":{{ current_url | json_encode | safe }},
+  "image":{{ get_url(path="og.png") | json_encode | safe }},
+  "codeRepository":{{ config.extra.repo | json_encode | safe }},
+  "programmingLanguage":{"@type":"ComputerLanguage","name":"Rust"},
+  "runtimePlatform":"Rust 1.88+",
+  "license":["https://spdx.org/licenses/MIT.html","https://spdx.org/licenses/Apache-2.0.html"],
+  "author":{"@type":"Person","name":{{ config.author | json_encode | safe }}},
+  "keywords":"WBCI, S/PRI, WITA, Anbieterwechsel, Providerwechsel, § 59 TKG, Rufnummernportierung, number porting, Open Access, FTTH, AK S&P, carrier interface, Rust"},
+ {"@type":"FAQPage","mainEntity":[
+  {%- for f in section.extra.faq %}
+  {"@type":"Question","name":{{ f.q | json_encode | safe }},"acceptedAnswer":{"@type":"Answer","text":{{ f.a | json_encode | safe }}}}{% if not loop.last %},{% endif %}
+  {%- endfor %}]}
+]}
+</script>
+{% endblock %}
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Open-source Rust crates · WBCI · S/PRI</p>
+      <h1 id="hero-title">The German provider switch, in&nbsp;Rust</h1>
+      <p class="lede">
+        <strong>WBCI 2.0</strong> for the § 59 TKG <span lang="de">Anbieterwechsel</span> and
+        <span lang="de">Rufnummernportierung</span> between providers, <strong>S/PRI 4.x</strong>
+        for open-access fibre orders with the network owner: typed messages, XML proven against
+        the official schemas, deadlines that explain themselves and the whole process as a
+        value. Sans-I/O, so transport, signing and storage stay yours.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="{{ get_url(path='@/docs/start/getting-started.md') | safe }}">Get started</a>
+        <a class="btn" href="{{ get_url(path='@/docs/start/introduction.md') | safe }}">How a switch works</a>
+      </div>
+      <pre class="install" aria-label="Install"><code><span class="prompt" aria-hidden="true">$ </span>cargo add telco-interop</code></pre>
+      <p class="install-alt">or only one interface: <code>cargo add wbci</code> · <code>cargo add spri</code></p>
+    </div>
+    <figure class="showcase">
+      <figcaption>Answer a pre-agreement as the losing provider</figcaption>
+      {{ section.content | safe }}
+    </figure>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="trust-title">
+  <div class="wrap">
+    <h2 id="trust-title" class="visually-hidden">Why you can rely on it</h2>
+    <ul class="trust">
+      <li><strong>373 + 776</strong><span>WBCI and S/PRI payloads validated against the official XSDs on every CI run</span></li>
+      <li><strong>Fuzzed</strong><span>hostile XML refused with its receipt code, never a panic</span></li>
+      <li><strong>Sans-I/O</strong><span>no network, no clock, no global state</span></li>
+      <li><strong>Redacted</strong><span>personal data never in <code>Debug</code>, errors or logs</span></li>
+      <li><strong>MSRV 1.88</strong><span>three external dependencies, no <code>unsafe</code></span></li>
+      <li><strong>MIT / Apache-2.0</strong><span>dual-licensed, open source</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="wrap section" aria-labelledby="flow-title">
+  <h2 id="flow-title">One switch, two interfaces</h2>
+  <p class="section-lede">
+    The gaining provider agrees the switch with the losing provider over WBCI, then orders the
+    line from the network owner over S/PRI with the same Vorabstimmungs-ID.
+    <code>telco_interop::Wechsel</code> shows it as one timeline and checks that both sides agree.
+  </p>
+  <ol class="flow" aria-label="Messages of one provider switch, in order">
+    <li class="lane-wbci"><b>VA-KUE-MRN</b><span>EKPauf → EKPabg</span><small>pre-agreement</small></li>
+    <li class="lane-wbci"><b>RUEM-VA</b><span>EKPabg → EKPauf</span><small>agreed, binding date</small></li>
+    <li class="lane-wbci"><b>AKM-TR</b><span>EKPauf → EKPabg</span><small>takes over the line</small></li>
+    <li class="lane-spri"><b>PV</b><span>EKPauf → network</span><small>provider-switch order</small></li>
+    <li class="lane-spri"><b>QEB</b><span>network → EKPauf</span><small>order admissible</small></li>
+    <li class="lane-spri"><b>AKM-PV</b><span>network → EKPabg</span><small>switch announced</small></li>
+    <li class="lane-spri"><b>RUEM-PV</b><span>EKPabg → network</span><small>losing side answers</small></li>
+    <li class="lane-spri"><b>ABM · ABM-PV</b><span>network → both</span><small>date confirmed</small></li>
+    <li class="lane-spri"><b>ERLM · ERLM-PV</b><span>network → both</span><small>switched</small></li>
+    <li class="lane-spri"><b>ENTM · ENTM-PV</b><span>network → both</span><small>billing date</small></li>
+  </ol>
+  <p class="flow-legend"><span class="key key-wbci">WBCI</span> provider ↔ provider <span class="key key-spri">S/PRI</span> provider ↔ network owner
+    · <a href="{{ get_url(path='@/docs/across-both/one-switch.md') | safe }}">One switch across WBCI and S/PRI</a></p>
+</section>
+
+<section class="wrap section" aria-labelledby="features-title">
+  <h2 id="features-title">What the crates give you</h2>
+  <ul class="feature-grid">
+    {% for f in section.extra.features %}
+    <li><h3>{{ f.title }}</h3><p>{{ f.text | safe }}</p></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="wrap section" aria-labelledby="crates-title">
+  <h2 id="crates-title">The crates</h2>
+  <div class="table-wrap">
+    <table class="crates">
+      <thead><tr><th scope="col">Crate</th><th scope="col">Interface</th><th scope="col">Between</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        {% for c in section.extra.crates %}
+        <tr>
+          <th scope="row"><a href="https://crates.io/crates/{{ c.name }}"><code>{{ c.name }}</code></a></th>
+          <td>{{ c.interface }}</td>
+          <td>{{ c.between }}</td>
+          <td><span class="status{% if c.ok %} status-ok{% endif %}">{{ c.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">All share one foundation (<code>carrier-core</code>: identifiers, working-day calendar, hardened XML), which you never depend on directly.</p>
+</section>
+
+<section class="wrap section narrow" aria-labelledby="faq-title">
+  <h2 id="faq-title">Questions</h2>
+  <div class="faq">
+    {% for f in section.extra.faq %}
+    <details{% if loop.first %} open{% endif %}>
+      <summary><h3>{{ f.q }}</h3></summary>
+      <p>{{ f.a }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="wrap section cta-band" aria-labelledby="cta-title">
+  <h2 id="cta-title">Start with one pre-agreement</h2>
+  <p>Build a Vorabstimmung, check it, write the XML and follow its deadlines.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="{{ get_url(path='@/docs/start/getting-started.md') | safe }}">Read the getting-started guide</a>
+    <a class="btn" href="{{ config.extra.api_url }}">Browse the API on docs.rs</a>
+    <a class="btn" href="{{ config.extra.repo }}">Star on GitHub</a>
+  </div>
+</section>
+{% endblock %}

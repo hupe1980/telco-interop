@@ -1,0 +1,287 @@
+name: Release
+
+# Push an annotated tag to cut a release of carrier-core, wbci, spri and telco-interop:
+#
+#   git tag -a v0.1.0 -m 'v0.1.0' && git push origin v0.1.0
+#
+# `workflow_dispatch` runs everything except the irreversible steps (crates.io, the release
+# page, the tap), so the pipeline can be rehearsed before a tag exists.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One release at a time, never cancelled: a half-finished publish is worse than a slow one.
+# (Not "release-…": the called CI workflow's group is named after this workflow.)
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  # Published in dependency order. wita-kit is a name reservation and is not released here.
+  CRATES: carrier-core wbci spri telco-interop
+
+jobs:
+  # Everything that can say "no" cheaply, before the builds start.
+  guard:
+    name: guard
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+
+      # A crates.io version is immutable and a tag is not, so the tag is checked against the
+      # manifests. The released crates share one version.
+      - name: The tag and every released crate's version must agree
+        id: version
+        run: |
+          meta=$(cargo metadata --no-deps --format-version 1)
+          version=$(jq -r '.packages[] | select(.name == "telco-interop") | .version' <<<"$meta")
+          for crate in $CRATES; do
+            v=$(jq -r --arg c "$crate" '.packages[] | select(.name == $c) | .version' <<<"$meta")
+            if [ "$v" != "$version" ]; then
+              echo "::error::$crate is $v, telco-interop is $version: release them together"
+              exit 1
+            fi
+          done
+          if [ "${{ github.event_name }}" = "push" ]; then
+            tag="${GITHUB_REF_NAME}"
+            if [ "$tag" != "v$version" ]; then
+              echo "::error::tag $tag does not match the crates' version $version (expected v$version)"
+              exit 1
+            fi
+          else
+            tag="v$version"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "releasing $tag: $CRATES"
+
+      # The packaged crates are not the working tree: the site, the fuzz harness and the
+      # downloaded schemas are not shipped, and a crate that builds only because of a file it
+      # does not ship fails here rather than on crates.io.
+      - name: The published packages build from what they ship
+        run: |
+          args=()
+          for crate in $CRATES; do args+=(-p "$crate"); done
+          cargo publish --dry-run --locked "${args[@]}"
+
+  # The release gate is CI itself, invoked rather than copied.
+  ci:
+    name: ci
+    needs: guard
+    uses: ./.github/workflows/ci.yml
+
+  # The command line for people without a Rust toolchain; the Homebrew tap installs these.
+  binaries:
+    name: telco-interop ${{ matrix.target }}
+    needs: [guard, ci]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
+          # Statically linked: one file that runs on any Linux.
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, packages: musl-tools }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm, packages: musl-tools }
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+      - if: matrix.packages
+        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.packages }}
+
+      # `cli` is not a default feature; it is the only thing that builds this binary.
+      - run: cargo build --release --locked -p telco-interop --features cli --bin telco-interop --target ${{ matrix.target }}
+
+      # Every target builds on its own architecture, so the archived binary is also the one
+      # that answers here.
+      - name: Package
+        shell: bash
+        run: |
+          name="telco-interop-${{ needs.guard.outputs.tag }}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          if [ "${{ runner.os }}" = "Windows" ]; then bin=telco-interop.exe; else bin=telco-interop; fi
+          cp "target/${{ matrix.target }}/release/$bin" "dist/$name/$bin"
+          [ "$bin" = telco-interop ] && strip "dist/$name/$bin" || true
+          cp README.md LICENSE-MIT LICENSE-APACHE "dist/$name/"
+          "./dist/$name/$bin" --version
+          "./dist/$name/$bin" code 8103 > /dev/null
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "$name.zip" "$name" > /dev/null
+          else
+            tar -czf "$name.tar.gz" "$name"
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: telco-interop-${{ matrix.target }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+          if-no-files-found: error
+
+  # The only step that cannot be taken back, so it runs after the gate, the dry run and every
+  # binary. crates.io Trusted Publishing: the job exchanges its OIDC identity for a short-lived
+  # token, so no registry secret is stored. Each crate is configured on crates.io for this
+  # repository, this workflow file and the `crates-io` environment.
+  crates-io:
+    name: crates.io
+    needs: [guard, ci, binaries]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
+        id: auth
+      # In dependency order; a crate whose version is already on crates.io is skipped, so a
+      # release that failed half-way can be re-run.
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          for crate in $CRATES; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' -A 'telco-interop release (github actions)' \
+              "https://crates.io/api/v1/crates/$crate/$VERSION")
+            if [ "$status" = 200 ]; then
+              echo "$crate $VERSION is already published"
+              continue
+            fi
+            cargo publish --locked -p "$crate"
+          done
+
+  # The release page is the announcement, so it goes up once the crates are installable.
+  github-release:
+    name: github release
+    needs: [guard, binaries, crates-io]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+          pattern: telco-interop-*
+          merge-multiple: true
+
+      # Whoever downloads a binary can check it without trusting the page it came from.
+      - name: Checksums
+        working-directory: artifacts
+        run: sha256sum -- *.tar.gz *.zip > SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sha256sums
+          path: artifacts/SHA256SUMS
+          if-no-files-found: error
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          # The changelog sections of this version ("## <crate> <version> — …") are the
+          # release note; `--generate-notes` appends the commit list.
+          awk -v v="$VERSION" '
+            /^## / { on = (index($0, " " v " ") > 0 || $0 ~ " " v "$") }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          gh release create "${{ needs.guard.outputs.tag }}" \
+            --title "${{ needs.guard.outputs.tag }}" \
+            --notes-file notes.md \
+            --generate-notes \
+            --verify-tag \
+            artifacts/*
+
+  # The Homebrew formula follows the release it points at, for a release only (a `-` in the
+  # version is a pre-release). Owner setup, once: the GitHub App already used for
+  # hupe1980/homebrew-tap, and a GitHub environment `homebrew` (deployment rule: tags `v*`)
+  # holding HOMEBREW_APP_ID and HOMEBREW_APP_PRIVATE_KEY.
+  tap:
+    name: homebrew tap
+    needs: [guard, github-release]
+    if: github.event_name == 'push' && !contains(needs.guard.outputs.version, '-')
+    runs-on: ubuntu-latest
+    environment: homebrew
+    env:
+      VERSION: ${{ needs.guard.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sha256sums
+          path: dist
+      # A short-lived installation token that can write to the tap only.
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        id: app-token
+        with:
+          app-id: ${{ secrets.HOMEBREW_APP_ID }}
+          private-key: ${{ secrets.HOMEBREW_APP_PRIVATE_KEY }}
+          owner: hupe1980
+          repositories: homebrew-tap
+          permission-contents: write
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: hupe1980/homebrew-tap
+          token: ${{ steps.app-token.outputs.token }}
+          path: tap
+          persist-credentials: true
+      - name: Update the formula
+        run: |
+          mkdir -p tap/Formula
+          packaging/homebrew/formula.sh "$VERSION" dist/SHA256SUMS > tap/Formula/telco-interop.rb
+          cd tap
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "telco-interop release"
+            git config user.email "telco-interop-release@users.noreply.github.com"
+            git add Formula/telco-interop.rb
+            git commit -m "telco-interop $VERSION"
+            git push
+          fi
+
+  # What a user gets from the tap installs and answers, on clean machines.
+  smoke:
+    name: brew install ${{ matrix.os }}
+    needs: [guard, tap]
+    if: github.event_name == 'push' && needs.tap.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - if: runner.os == 'Linux'
+        run: |
+          if [ ! -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+      - run: |
+          brew install hupe1980/tap/telco-interop
+          brew test telco-interop
+          [ "$(telco-interop --version)" = "telco-interop ${{ needs.guard.outputs.version }}" ]

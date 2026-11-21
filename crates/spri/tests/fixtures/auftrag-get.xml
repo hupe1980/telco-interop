@@ -1,0 +1,30 @@
+<env:annehmenAuftragRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:order="http://spri.telekom.de/oss/v4/order" xmlns:fttx="http://spri.telekom.de/oss/v4/fttx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2026-11-23T09:30:00+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Test CA, O=Example</issuer>
+      <serial>4711</serial>
+    </signaturId>
+  </control>
+  <auftrag>
+    <externeAuftragsnummer>A-2026-0001</externeAuftragsnummer>
+    <auftraggeber>
+      <auftraggebernummer>4711</auftraggebernummer>
+      <leistungsnummer>RV-1</leistungsnummer>
+    </auftraggeber>
+    <geschaeftsfall xsi:type="order:DiagnoseGetType">
+      <vertragsnummer>V123456</vertragsnummer>
+      <lineId>DEU.NB01.1754639821</lineId>
+      <auftragsposition>
+        <parameter>
+          <operation>CurrBBDS</operation>
+          <operation>CurrBBUS</operation>
+        </parameter>
+      </auftragsposition>
+    </geschaeftsfall>
+    <geschaeftsfallArt>Diagnose</geschaeftsfallArt>
+    <aenderungskennzeichen>Standard</aenderungskennzeichen>
+  </auftrag>
+</env:annehmenAuftragRequest>

@@ -1,0 +1,13 @@
+# The crates never read the wall clock; time is an argument (AGENTS.md).
+disallowed-methods = [
+  { path = "std::time::SystemTime::now", reason = "sans-I/O: take the time as an argument" },
+  { path = "std::time::Instant::now", reason = "sans-I/O: take the time as an argument" },
+  { path = "jiff::Timestamp::now", reason = "sans-I/O: take the time as an argument" },
+  { path = "jiff::ZonedDateTime::now", reason = "sans-I/O: take the time as an argument" },
+]
+doc-valid-idents = ["..", "BNetzA", "WBCI", "EKPauf", "EKPabg", "VorabstimmungsId", "LineID", "WITA", "TKG", "FTTx", "HomeID"]
+# Tests may panic, unwrap and index: a failing test is the point.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
