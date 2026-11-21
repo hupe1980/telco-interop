@@ -12,8 +12,8 @@ minify_html = true
 author = "hupe1980"
 
 [link_checker]
-# The repository is linked before it is public; crates.io and docs.rs refuse bots.
-skip_prefixes = ["https://crates.io/", "https://docs.rs/", "https://ak-spri.de/", "https://github.com/hupe1980/telco-interop"]
+# These hosts refuse or rate-limit link checkers.
+skip_prefixes = ["https://crates.io/", "https://docs.rs/", "https://ak-spri.de/"]
 
 [markdown]
 smart_punctuation = true
