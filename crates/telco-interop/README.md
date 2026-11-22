@@ -57,7 +57,7 @@ The `cli` feature (not on by default) adds the `telco-interop` command:
 ```sh
 brew install hupe1980/tap/telco-interop      # or: cargo install telco-interop --features cli
 telco-interop read abbm.xml                  # what a file is, or the TEQ code to refuse it with
-telco-interop check va.xml                   # the validation issues, with rule and source
+telco-interop check va.xml auftrag.xml       # WBCI and S/PRI validation issues, with rule, source and code
 telco-interop code 8103                      # a Meldungscode in WBCI and S/PRI
 telco-interop timeline --as ekpauf switch/   # one switch replayed: timeline, findings, deadlines
 ```

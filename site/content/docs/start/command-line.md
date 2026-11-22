@@ -61,8 +61,11 @@ Files may be bare payloads or SOAP 1.1 envelopes; the interface is detected from
 
 ## Check a file
 
-`check` lists the [validation issues](@/docs/wbci/validation.md) of each WBCI request, message or
-receipt, with rule id and source, and the read errors of files of both interfaces:
+`check` lists the validation issues of each [WBCI](@/docs/wbci/validation.md) or
+[S/PRI](@/docs/spri/validation.md) file — request, order, message or receipt — with rule id,
+source and the code the peer would answer with, or why the file cannot be read. The date rules
+of requests and orders (lead times, a date in the past) are judged at the file's own control
+timestamp, the moment it was sent:
 
 ```text
 $ telco-interop check storno.xml
@@ -70,7 +73,15 @@ storno.xml
   warning [str-auf.ekpabg-grund] Anfrage/Stornogrund: an EKPabg may cancel only for the reasons of Anl. 1 §2.9.2 (…) and must hold proof (Anl. 1 V5.4.1 §2.9.2)
 ```
 
-S/PRI files are checked for readability only; the S/PRI crate has no validation beyond its reader.
+```text
+$ telco-interop check tv.xml
+tv.xml
+  error [spri.aekz.terminverschiebung] auftrag/aenderungskennzeichen: AEN-LMAE has no Terminverschiebung; only NEU, KUE-AG, LAE and PV have one (S/PRI 4.4 §5.3.1.3, §6.1.3, §6.2.1.3, §6.2.2.3) → 1007
+```
+
+`check` exits 1 when a file is unreadable or has an error; warnings alone exit 0. It checks each
+file on its own; a follow-up order against its original is the library call
+`Auftrag::issues_against`.
 
 ## Explain a code
 

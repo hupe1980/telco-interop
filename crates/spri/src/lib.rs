@@ -16,6 +16,7 @@
 //! | look up a code | [`Meldungscode`] |
 //! | store an attachment | [`Anlage::safe_file_name`] |
 //! | follow an order's lifecycle: what may come next, what is due | [`process::Process`], [`deadline`], [`Abbm::outcome`] |
+//! | know whether the network owner will refuse it | [`Auftrag::issues_at`], [`Auftrag::issues_against`], [`Meldung::issues`] → [`Issue`] |
 //!
 //! ## A provider switch after WBCI
 //!
@@ -103,6 +104,8 @@
 //! order, message and receipt may follow which per business case, with Storno,
 //! Terminverschiebung, the TAM/MTAM loop and the provider-switch leg with the losing provider,
 //! and reports the deadlines ([`deadline`]); its interpretations are listed in [`process`].
+//! [`validate`] checks an order or message before it is sent, with 34 cited rules; its
+//! interpretations are marked in its rule table.
 //!
 //! Not covered, by design: SOAP transport, WS-Security signing, TLS, persistence.
 //!
@@ -130,6 +133,7 @@ mod code;
 pub mod deadline;
 mod model;
 pub mod process;
+pub mod validate;
 mod values;
 pub mod xml;
 
@@ -137,6 +141,7 @@ pub mod xml;
 pub use carrier_core::{CarrierCode, LineId, SignaturText, ValueError, ValueErrorKind, VorabstimmungsId};
 pub use code::{AbbmOutcome, AbbmPhase, GeschaeftsfallCode, Meldungscode, Meldungstyp};
 pub use model::*;
+pub use validate::{Issue, Severity};
 pub use values::*;
 
 pub use carrier_core::Calendar;
@@ -154,4 +159,6 @@ mod site_guides {
     struct Lifecycle;
     #[doc = include_str!("../../../site/content/docs/spri/codes.md")]
     struct Codes;
+    #[doc = include_str!("../../../site/content/docs/spri/validation.md")]
+    struct Validation;
 }

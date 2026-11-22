@@ -11,7 +11,7 @@ title = "Typed, all the way down"
 text = "A <code>VorabstimmungsId</code> exists only if it is valid. Requests mirror the schema's <code>xsi:type</code>, mandatory elements are plain fields, so an incomplete request does not compile."
 [[extra.features]]
 title = "Know before you send"
-text = "28 cited rules predict the peer's refusal: wrong code for the case, a lead time too short, a number block given backwards. Each issue names the element, the clause and the code the peer would answer with."
+text = "28 cited WBCI rules and 34 S/PRI rules predict the peer's refusal: wrong code for the case, a lead time too short, a Terminverschiebung where the business case has none. Each issue names the element, the clause and the code the peer would answer with."
 [[extra.features]]
 title = "Deadlines that explain themselves"
 text = "„3 AT after the TEQ“, „before 0:00 of X−3 AT“, „10 Werktage after the TAM“: computed in German time, with every counted and skipped day and why."

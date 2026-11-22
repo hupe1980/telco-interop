@@ -12,8 +12,9 @@ seo_title = "S/PRI 4.x in Rust: open-access fibre orders · telco-interop"
 
 S/PRI is how a service provider orders lines from a fibre network owner and receives its
 answers. The `spri` crate covers all of S/PRI 4.x (schema 4.00.03): the eight order business
-cases, the twenty message types and the technical receipt, the order lifecycle of Anlage 7
-and the 215 message codes.
+cases, the twenty message types and the technical receipt, the order lifecycle of Anlage 7,
+the 215 message codes and the [validation](@/docs/spri/validation.md) that predicts the network
+owner's refusal before sending.
 
 ```sh
 cargo add spri

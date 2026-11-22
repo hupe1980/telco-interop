@@ -24,8 +24,8 @@
       </meldungsattribute>
       <meldungspositionen>
         <position>
-          <meldungscode>OK</meldungscode>
-          <meldungstext>OK.</meldungstext>
+          <meldungscode>8006</meldungscode>
+          <meldungstext>Der Anschluss muss abgeschaltet werden.</meldungstext>
         </position>
       </meldungspositionen>
     </meldungstyp>

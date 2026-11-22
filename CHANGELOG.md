@@ -4,6 +4,39 @@ All notable changes to the crates in this repository. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer, with
 breaking changes allowed before 1.0.
 
+## spri 0.1.1 — 2026-11-22
+
+### Added
+
+- Validation before sending (`spri::validate`): 34 cited rules on Storno and
+  Terminverschiebung per business case, Auftragsklammer, Zeitfenster, wish date, follow-up
+  orders, codes against message type and business case, the attributes a code requires and the
+  RUEM-PV refusal reasons. `Auftrag::issues`, `Auftrag::issues_at` (time of sending and
+  calendar), `Auftrag::issues_against` (a Storno, Terminverschiebung or Reklamation against its
+  order), `Meldung::issues` and `Teq::issues` return `Issue`s with element path, rule id,
+  source, severity and the ABBM code the network owner answers with.
+
+### Fixed
+
+- `spri::process`: a RUEM-PV antwortcode is compared ignoring ASCII case, so the handbook's
+  `LnB` refuses like the EPK's `LNB`.
+- `Zeitfenster::is_assigned` counts the special windows `20`–`41` of AH 2.9.5 §3.3.
+
+## telco-interop 0.1.1 — 2026-11-22
+
+### Added
+
+- `telco-interop check` reports the validation issues of S/PRI files and exits 1 on an error.
+
+### Changed
+
+- `telco-interop check` judges the date rules of WBCI requests and S/PRI orders at the file's
+  own control timestamp, so lead times that are too short and dates in the past are reported.
+
+## wbci 0.1.1, carrier-core 0.1.1 — 2026-11-22
+
+Released with spri and telco-interop; no changes.
+
 ## wbci 0.1.0 — 2026-11-21
 
 WBCI 2.0 (AK S&P; XSD V2.00, Anlage 1 V5.4.1, Arbeitshandbuch WBCI 2.10).

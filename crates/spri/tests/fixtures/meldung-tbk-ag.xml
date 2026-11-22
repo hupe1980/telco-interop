@@ -27,8 +27,8 @@
       </meldungsattribute>
       <meldungspositionen>
         <position>
-          <meldungscode>7039</meldungscode>
-          <meldungstext>Der mit der EST übermittelte Endkundentermin wird voraussichtlich wahrgenommen.</meldungstext>
+          <meldungscode>7030</meldungscode>
+          <meldungstext>Hinderungsgrund für letzten Endkundentermin ist beseitigt.</meldungstext>
         </position>
       </meldungspositionen>
     </meldungstyp>

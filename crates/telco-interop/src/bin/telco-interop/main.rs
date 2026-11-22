@@ -38,8 +38,8 @@ enum Command {
         #[arg(required = true)]
         files: Vec<PathBuf>,
     },
-    /// The validation issues of each WBCI request, message or receipt, and the read errors of
-    /// files of both interfaces.
+    /// The validation issues of each WBCI or S/PRI file (request, order, message or receipt),
+    /// or why it cannot be read; fails on an error.
     Check {
         /// WBCI or S/PRI payloads, bare or in a SOAP 1.1 envelope.
         #[arg(required = true)]
@@ -154,30 +154,59 @@ fn check(files: &[PathBuf]) -> bool {
                 continue;
             }
         };
-        let issues = match &payload {
-            Parsed::Wbci(p) => match &**p {
-                wbci::Payload::AnfrageRequest { anfrage, .. } => anfrage.issues(),
-                wbci::Payload::MeldungRequest { meldung, .. } => meldung.issues(None),
-                wbci::Payload::AnfrageResponse { quittung, .. } | wbci::Payload::MeldungResponse { quittung, .. } => {
-                    quittung.issues()
-                }
-            },
-            Parsed::Spri(_) => {
-                out("  S/PRI: readable; the S/PRI crate has no validation beyond the reader");
-                continue;
-            }
+        // Date rules are judged at the file's own control timestamp: the moment it was sent.
+        let sent_at = payload.at();
+        let (interface, issues) = match &payload {
+            Parsed::Wbci(p) => (
+                "WBCI",
+                match &**p {
+                    wbci::Payload::AnfrageRequest { anfrage, .. } => {
+                        anfrage.issues_at(sent_at, &wbci::Calendar::wbci()).iter().map(wbci_line).collect()
+                    }
+                    wbci::Payload::MeldungRequest { meldung, .. } => {
+                        meldung.issues(None).iter().map(wbci_line).collect()
+                    }
+                    wbci::Payload::AnfrageResponse { quittung, .. }
+                    | wbci::Payload::MeldungResponse { quittung, .. } => {
+                        quittung.issues().iter().map(wbci_line).collect()
+                    }
+                },
+            ),
+            Parsed::Spri(p) => (
+                "S/PRI",
+                match &**p {
+                    spri::Payload::AuftragRequest { auftrag, .. } => {
+                        auftrag.issues_at(sent_at, &spri::Calendar::werktage()).iter().map(spri_line).collect()
+                    }
+                    spri::Payload::MeldungRequest { meldung, .. } => meldung.issues().iter().map(spri_line).collect(),
+                    spri::Payload::AuftragResponse { quittung, .. }
+                    | spri::Payload::MeldungResponse { quittung, .. } => {
+                        quittung.issues().iter().map(spri_line).collect::<Vec<_>>()
+                    }
+                },
+            ),
         };
         if issues.is_empty() {
-            out("  WBCI: no issues");
+            out(format_args!("  {interface}: no issues"));
         }
-        for issue in &issues {
-            if issue.severity == wbci::Severity::Error {
+        for (error, line) in &issues {
+            if *error {
                 ok = false;
             }
-            out(format_args!("  {issue}"));
+            out(format_args!("  {line}"));
         }
     }
     ok
+}
+
+/// Whether the issue is an error, and its line.
+fn wbci_line(i: &wbci::Issue) -> (bool, String) {
+    (i.severity == wbci::Severity::Error, i.to_string())
+}
+
+/// Whether the issue is an error, and its line.
+fn spri_line(i: &spri::Issue) -> (bool, String) {
+    (i.severity == spri::Severity::Error, i.to_string())
 }
 
 // -- code -----------------------------------------------------------------------------------

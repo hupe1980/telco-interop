@@ -93,7 +93,8 @@
 //!   (S/PRI 4.4 §5.5.1.2), also on the TAM path, which the EPK does not draw.
 //! - A RUEM-PV after the antwortfrist is refused: the network owner aborts (S/PRI 4.4
 //!   §5.5.1.1). A RUEM-PV is negative when `zustimmungProviderwechsel` is `N` or its
-//!   `antwortcode` is one of `LNB`, `KVE`, `TAV` (Anl. 7 EPK V.13 p.7), `VnB`, `Vnv`.
+//!   `antwortcode` is one of `LnB`, `KVE`, `TAV`, `VnB`, `Vnv` (AH 2.9.5 §6.5; Anl. 7 EPK V.13 p.7
+//!   writes `LNB`), compared ignoring ASCII case.
 //! - A NEU is a Konnektivität (build-out) order when the caller says so
 //!   ([`Process::with_konnektivitaet`]) or its first ABM carries a LineID whose line code is
 //!   all zeros (S/PRI 4.4 §5.1.6). It completes only after an ABM with a real LineID.
@@ -583,13 +584,13 @@ fn has_code(m: &Meldungsinhalt, codes: &[&str]) -> bool {
 }
 
 /// The cases with a Storno (all but DIAG and KUE-LE, Anl. 7 EPK V.13 p.4, p.9).
-const fn has_storno(fall: GeschaeftsfallCode) -> bool {
+pub(crate) const fn has_storno(fall: GeschaeftsfallCode) -> bool {
     !matches!(fall, GeschaeftsfallCode::Get | GeschaeftsfallCode::Set | GeschaeftsfallCode::KueLe)
 }
 
 /// The cases with a Terminverschiebung (NEU, KUE-AG, LAE, PV; Anl. 7 EPK V.13 p.1–3, p.6, p.7;
 /// none in AEN-LMAE, S/PRI 4.4 §5.3.1.3, EST, §6.1.3, DIAG and KUE-LE).
-const fn has_tv(fall: GeschaeftsfallCode) -> bool {
+pub(crate) const fn has_tv(fall: GeschaeftsfallCode) -> bool {
     matches!(
         fall,
         GeschaeftsfallCode::Neu | GeschaeftsfallCode::KueAg | GeschaeftsfallCode::Lae | GeschaeftsfallCode::Pv
@@ -601,13 +602,20 @@ const fn has_tam_loop(fall: GeschaeftsfallCode) -> bool {
     matches!(fall, GeschaeftsfallCode::Neu | GeschaeftsfallCode::Lae | GeschaeftsfallCode::Pv)
 }
 
+/// The losing provider's refusal reasons (S/PRI 4.4 §5.5.1.1; AH 2.9.5 §6.5: `LnB`, `KVE`,
+/// `TAV`, `VnB`, `Vnv`). Compared ignoring ASCII case: the handbook writes `LnB`, the EPK `LNB`
+/// (interpretation).
+pub(crate) const REFUSAL_CODES: [&str; 5] = ["LnB", "KVE", "TAV", "VnB", "Vnv"];
+
+/// Whether `code` is one of [`REFUSAL_CODES`].
+pub(crate) fn is_refusal_code(code: &Antwortcode) -> bool {
+    REFUSAL_CODES.iter().any(|c| c.eq_ignore_ascii_case(code.as_str()))
+}
+
 /// A negative RUEM-PV (S/PRI 4.4 §5.5.1.1; Anl. 7 EPK V.13 p.7).
 fn ruem_negative(r: &crate::RuemPv) -> bool {
     r.abgebender_provider.zustimmung == JaNein::Nein
-        || r.abgebender_provider
-            .antwortcode
-            .as_ref()
-            .is_some_and(|c| ["LNB", "KVE", "TAV", "VnB", "Vnv"].contains(&c.as_str()))
+        || r.abgebender_provider.antwortcode.as_ref().is_some_and(is_refusal_code)
 }
 
 impl Process {

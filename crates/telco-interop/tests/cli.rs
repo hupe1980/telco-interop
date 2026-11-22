@@ -143,14 +143,85 @@ fn every_fixture_reads() {
 // -- check ----------------------------------------------------------------------------------
 
 #[test]
-fn check_reports_wbci_issues_and_spri_readability() {
+fn check_reports_issues_of_both_interfaces() {
     let (out, code) = run(&[Path::new("check"), &wbci_fixture("va-kue-mrn.xml"), &spri_fixture("auftrag-pv.xml")]);
     assert_eq!(code, 0, "{out}");
-    contains_all(&out, &["WBCI: no issues", "S/PRI: readable"]);
+    contains_all(&out, &["WBCI: no issues", "S/PRI: no issues"]);
+    assert!(!out.contains("readable"), "{out}");
     // A warning does not fail the check.
     let (out, code) = run(&[Path::new("check"), &wbci_fixture("str-auf-ekpabg.xml")]);
     assert_eq!(code, 0, "{out}");
     contains_all(&out, &["warning [str-auf.ekpabg-grund] Anfrage/Stornogrund", "(Anl. 1 V5.4.1 §2.9.2)"]);
+}
+
+#[test]
+fn every_spri_fixture_checks_without_error() {
+    let files = fixtures(&spri_fixture(""));
+    assert_eq!(files.len(), 30);
+    let mut args = vec![PathBuf::from("check")];
+    args.extend(files);
+    let (out, code) = run(&args);
+    assert_eq!(code, 0, "{out}");
+    assert!(!out.contains("error ["), "{out}");
+}
+
+/// Writes `payload` as `name` into a fresh folder and runs `check` on it.
+fn check_spri(name: &str, payload: &spri::Payload) -> (String, i32) {
+    let dir = temp(name);
+    let file = dir.join(format!("{name}.xml"));
+    fs::write(&file, payload.to_xml().unwrap()).unwrap();
+    run(&[Path::new("check"), &file])
+}
+
+#[test]
+fn check_fails_on_an_spri_error() {
+    // A receipt that is OK and an error at once.
+    let spri::Payload::AuftragResponse { control, mut quittung } = spri_payload("teq-auftrag.xml") else { panic!() };
+    quittung.positionen.push(spri::Position::new(spri::Meldungscode::DATENSTRUKTUR_UNZULAESSIG));
+    let (out, code) = check_spri("teq-mixed", &spri::Payload::AuftragResponse { control, quittung });
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["error [spri.teq.mixed] quittung/meldungspositionen", "(S/PRI 4.4 §11.2.3.1)"]);
+    // A Terminverschiebung of a feature change: the network owner answers 1007.
+    let mut p = spri_payload("auftrag-aen-lmae.xml");
+    if let spri::Payload::AuftragRequest { auftrag, .. } = &mut p {
+        auftrag.aenderungskennzeichen = spri::Aenderungskennzeichen::Terminverschiebung;
+    }
+    let (out, code) = check_spri("aen-lmae-tv", &p);
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["error [spri.aekz.terminverschiebung] auftrag/aenderungskennzeichen", "→ 1007"]);
+}
+
+#[test]
+fn an_spri_warning_does_not_fail_the_check() {
+    let mut p = spri_payload("auftrag-lae.xml");
+    if let spri::Payload::AuftragRequest { auftrag, .. } = &mut p {
+        auftrag.termin_neu = Some("2027-01-20".parse().unwrap());
+    }
+    let (out, code) = check_spri("lae-termin-neu", &p);
+    assert_eq!(code, 0, "{out}");
+    contains_all(&out, &["warning [spri.termin-neu.only-tv] auftrag/terminNeu"]);
+}
+
+#[test]
+fn spri_issues_print_no_control_characters() {
+    // spri-validation/SR-003
+    let dir = temp("spri-escape");
+    let xml = fs::read_to_string(spri_fixture("meldung-abbm.xml")).unwrap();
+    assert!(xml.contains("<meldungscode>1001</meldungscode>"));
+    let evil = xml.replace("<meldungscode>1001</meldungscode>", "<meldungscode>\u{1b}[2J</meldungscode>");
+    let file = dir.join("abbm-esc.xml");
+    fs::write(&file, &evil).unwrap();
+    let (out, code) = run(&[Path::new("check"), &file]);
+    assert_eq!(code, 0, "an unknown code is a warning: {out}");
+    contains_all(&out, &["warning [spri.code.unknown]"]);
+    assert!(!out.contains('\u{1b}'), "{out:?}");
+    #[cfg(unix)]
+    {
+        let named = dir.join("evil\u{1b}[2J.xml");
+        fs::write(&named, &evil).unwrap();
+        let (out, _) = run(&[Path::new("check"), &named]);
+        assert!(!out.contains('\u{1b}') && out.contains("evil\u{FFFD}[2J.xml"), "{out:?}");
+    }
 }
 
 #[test]
@@ -603,4 +674,34 @@ fn a_folder_above_the_limit_is_refused() {
     let (out, code) = run(&[Path::new("timeline"), &dir, Path::new("--as"), Path::new("ekpauf")]);
     assert_eq!(code, 1, "{out}");
     contains_all(&out, &["error: more than 10000 files"]);
+}
+
+#[test]
+fn check_judges_dates_at_the_files_own_timestamp() {
+    let dir = temp("sent-at");
+    // S/PRI: a wish date before the order's control timestamp is refused (an error, exit 1).
+    let pv = fs::read_to_string(spri_fixture("auftrag-pv.xml")).unwrap();
+    assert!(pv.contains("<datum>2027-01-15</datum>"));
+    let late = dir.join("pv-past.xml");
+    fs::write(&late, pv.replace("<datum>2027-01-15</datum>", "<datum>2026-11-20</datum>")).unwrap();
+    let (out, code) = run(&[Path::new("check"), &late]);
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["spri.termin.past"]);
+    // WBCI: a Kundenwunschtermin closer than the lead time allows is reported.
+    let va = fs::read_to_string(wbci_fixture("va-kue-mrn.xml")).unwrap();
+    assert!(va.contains("<Kundenwunschtermin>2027-01-15</Kundenwunschtermin>"));
+    let soon = dir.join("va-soon.xml");
+    fs::write(
+        &soon,
+        va.replace(
+            "<Kundenwunschtermin>2027-01-15</Kundenwunschtermin>",
+            "<Kundenwunschtermin>2026-11-25</Kundenwunschtermin>",
+        ),
+    )
+    .unwrap();
+    let (out, _) = run(&[Path::new("check"), &soon]);
+    contains_all(&out, &["warning [va.lead]"]);
+    // The unchanged fixtures stay clean at their own timestamps.
+    let (out, code) = run(&[Path::new("check"), &spri_fixture("auftrag-pv.xml"), &wbci_fixture("va-kue-mrn.xml")]);
+    assert_eq!(code, 0, "{out}");
 }

@@ -377,8 +377,9 @@ fn is_email(s: &str) -> bool {
 }
 
 /// A time window for an appointment. XSD `ZeitfensterType`: the 125 values `1`–`99` and
-/// `A`–`Z`. Only `1` (working days 8–14 h), `2` (working days 14–20 h) and `3` (Saturdays
-/// 8–16 h) are assigned; the others are reserved („Nicht belegt").
+/// `A`–`Z`. The standard windows are `1` (working days 8–14 h), `2` (working days 14–20 h)
+/// and `3` (Saturdays 8–16 h), XSD 4.00.03 annotations; `20`–`41` are the special windows
+/// („Sonderzeitfenster", by additional agreement) of AH 2.9.5 §3.3. The others are reserved.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Zeitfenster(ZeitfensterRepr);
 
@@ -415,10 +416,11 @@ impl Zeitfenster {
         }
     }
 
-    /// Whether the window is assigned (`1`, `2`, `3`) rather than reserved.
+    /// Whether the window is assigned — a standard window (`1`–`3`) or a special window
+    /// (`20`–`41`, AH 2.9.5 §3.3) — rather than reserved.
     #[must_use]
     pub const fn is_assigned(self) -> bool {
-        matches!(self.0, ZeitfensterRepr::Number(1..=3))
+        matches!(self.0, ZeitfensterRepr::Number(1..=3 | 20..=41))
     }
 }
 
@@ -614,6 +616,10 @@ mod tests {
         }
         assert!(Zeitfenster::SAMSTAGS.is_assigned());
         assert!(!Zeitfenster::new("Q").unwrap().is_assigned());
+        assert!(Zeitfenster::new("20").unwrap().is_assigned());
+        assert!(Zeitfenster::new("41").unwrap().is_assigned());
+        assert!(!Zeitfenster::new("19").unwrap().is_assigned());
+        assert!(!Zeitfenster::new("42").unwrap().is_assigned());
     }
 
     // spri-model/SR-002: personal data does not appear in Debug output.

@@ -10,9 +10,9 @@
   </control>
   <meldung>
     <auftragstyp>
-      <geschaeftsfall>NEU</geschaeftsfall>
+      <geschaeftsfall>EST</geschaeftsfall>
       <aenderungsKennzeichen>Standard</aenderungsKennzeichen>
-      <geschaeftsfallart>Bereitstellung</geschaeftsfallart>
+      <geschaeftsfallart>Entstoerung</geschaeftsfallart>
     </auftragstyp>
     <meldungstyp xsi:type="message:MeldungstypZWM-AGType">
       <meldungsattribute>
@@ -30,8 +30,8 @@
       </meldungsattribute>
       <meldungspositionen>
         <position>
-          <meldungscode>0073</meldungscode>
-          <meldungstext>Information zum Auftrag</meldungstext>
+          <meldungscode>7040</meldungscode>
+          <meldungstext>Ergänzende Information zum Auftrag.</meldungstext>
         </position>
       </meldungspositionen>
     </meldungstyp>

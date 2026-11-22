@@ -21,6 +21,7 @@ nav = "Scope and interpretations"
 | S/PRI Anlage 7 „EPKs der Geschäftsfälle" | V.13 (09.10.2026) |
 | S/PRI XML schema (Anlage 3) | 4.00.03 (19.12.2014), for all 4.x; namespaces `http://spri.telekom.de/oss/v4/…` |
 | Arbeitshandbuch S/PRI 4.x | V2.9.5 (message codes §6.3/§6.4) |
+| Struktur und Semantik der LineID | V1.4 |
 
 The specifications are published by the AK S&P (Arbeitskreis Schnittstellen & Prozesse,
 hosted by VATM and BUGLAS) at [ak-spri.de](https://ak-spri.de/informationen-zur-wbci/wbci-spezifikationen/).
@@ -56,6 +57,14 @@ record you found).
 | S/PRI release number | written with two digits (`04`) | `4` |
 | S/PRI certificate issuer and serial | the WBCI character set (the values are shared with WBCI) | — |
 | S/PRI Storno and Terminverschiebung limit: 36 hours (handbook) or 3 Arbeitstage (fact sheets) | 36 hours of elapsed time before 0:00 of the binding date | 3 Arbeitstage |
+| S/PRI Zeitfenster `1`/`2` „Werktags" | Monday to Saturday | Monday to Friday |
+| S/PRI wish date in the past outside EST (the fact sheet of 7014 marks EST only) | ABBM 1003 („außerhalb des zulässigen Zeitrahmens") | no code |
+| S/PRI Geschäftsfallart of a PV | `Endkundenanbieterwechsel` or `Bereitstellung` (the contract treats a PV as a provisioning) | `Endkundenanbieterwechsel` only |
+| S/PRI KUE-AG with a Vorabstimmungs-ID | a provider switch with WITA: without a WITA contract number a warning | no check |
+| S/PRI ABBM 1006/1012 „Erledigungstermin offener Auftrag" | carried in `wiedervorlagetermin` | no check |
+| S/PRI RUEM-PV antwortcodes (`LnB` in the handbook, `LNB` in the EPK) | compared ignoring case; a consenting RUEM-PV with one is a contradiction | exact spelling |
+| S/PRI order whose LineID equals its Vorabstimmungs-ID (LineID V1.4 §3.1.3) | an error, answered with 8144 („LineID ist nicht bekannt"): line codes and pre-agreement ids are distinct ranges | no check |
+| S/PRI receipt with `OK` and an error code | an error | allowed |
 | § 59 TKG continuity across WBCI and S/PRI | the S/PRI completion date stands in for the end of the outage (`wechsel.kontinuitaet`) | — |
 
 Report a different reading of the specifications as an issue: the crate follows the text, and

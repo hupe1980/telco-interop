@@ -53,7 +53,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 â€” â€
 | | |
 |---|---|
 | **Schema-proven** | every payload kind validated against the official XSDs on each CI run: 373 WBCI, 776 S/PRI payloads |
-| **Know before you send** | 28 cited WBCI rules predict the peer's refusal and its code |
+| **Know before you send** | 28 cited WBCI and 34 S/PRI rules predict the peer's refusal and its code |
 | **Explained deadlines** | Arbeitstage and Werktage in German time, with every counted and skipped day |
 | **Processes** | a state machine per WBCI pre-agreement and per S/PRI order (Anlage 7 EPKs) |
 | **Across both** | `Wechsel`: one timeline, both interfaces' deadlines, six agreement checks |

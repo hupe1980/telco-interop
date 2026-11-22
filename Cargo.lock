@@ -71,7 +71,7 @@ checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
 name = "carrier-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "jiff",
  "quick-xml",
@@ -468,10 +468,11 @@ dependencies = [
 
 [[package]]
 name = "spri"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "carrier-core",
  "jiff",
+ "proptest",
  "quick-xml",
  "thiserror",
 ]
@@ -489,7 +490,7 @@ dependencies = [
 
 [[package]]
 name = "telco-interop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "carrier-core",
  "clap",
@@ -583,7 +584,7 @@ dependencies = [
 
 [[package]]
 name = "wbci"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "carrier-core",
  "jiff",
@@ -618,4 +619,4 @@ dependencies = [
 
 [[package]]
 name = "wita-kit"
-version = "0.1.0"
+version = "0.1.1"

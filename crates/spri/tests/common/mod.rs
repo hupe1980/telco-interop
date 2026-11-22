@@ -504,7 +504,7 @@ pub fn kdle() -> Kdle {
         auftraggebernummer: ag(),
         abschaltungstermin: date("2027-06-30"),
         abschaltungsgrund: Some(Freitext::new("Netzumbau").unwrap()),
-        positionen: vec![pos("OK")],
+        positionen: vec![pos("8006")],
     }
 }
 
@@ -539,7 +539,7 @@ pub fn zwm_ag() -> ZwmAg {
         nachricht: Freitext::new("Kunde ist ab 14 Uhr erreichbar").unwrap(),
         ansprechpartner: None,
         anlage: Some(anlage()),
-        positionen: vec![pos("0073")],
+        positionen: vec![pos("7040")],
     }
 }
 
@@ -655,9 +655,12 @@ pub fn messages() -> Vec<(&'static str, Meldung)> {
         ("meldung-mtam", meldung(G::Neu, A::Bereitstellung, Meldungsinhalt::Mtam(tam()))),
         ("meldung-kdle", meldung(G::KueLe, A::Kuendigung, kdle())),
         ("meldung-zwm-le", meldung(G::Neu, A::Bereitstellung, zwm_le())),
-        ("meldung-zwm-ag", meldung(G::Neu, A::Bereitstellung, zwm_ag())),
+        ("meldung-zwm-ag", meldung(G::Est, A::Entstoerung, zwm_ag())),
         ("meldung-tbk-le", meldung(G::Est, A::Entstoerung, Meldungsinhalt::TbkLe(tbk()))),
-        ("meldung-tbk-ag", meldung(G::Est, A::Entstoerung, Meldungsinhalt::TbkAg(tbk()))),
+        (
+            "meldung-tbk-ag",
+            meldung(G::Est, A::Entstoerung, Meldungsinhalt::TbkAg(Tbk { positionen: vec![pos("7030")], ..tbk() })),
+        ),
         ("meldung-akm-pv", meldung(G::Pv, A::Endkundenanbieterwechsel, akm_pv())),
         ("meldung-ruem-pv", meldung(G::Pv, A::Endkundenanbieterwechsel, ruem_pv())),
         ("meldung-abm-pv", meldung(G::Pv, A::Endkundenanbieterwechsel, abm_pv())),

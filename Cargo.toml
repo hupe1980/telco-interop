@@ -5,7 +5,7 @@ members  = ["crates/*"]
 
 [workspace.package]
 # One version for every crate: they are released together (see .github/workflows/release.yml).
-version      = "0.1.0"
+version      = "0.1.1"
 edition      = "2024"
 rust-version = "1.88"
 authors      = ["hupe1980"]
@@ -14,9 +14,9 @@ repository   = "https://github.com/hupe1980/telco-interop"
 
 [workspace.dependencies]
 # The workspace's own crates; their version is the workspace version above.
-carrier-core = { path = "crates/carrier-core", version = "=0.1.0" }
-wbci         = { path = "crates/wbci", version = "=0.1.0" }
-spri         = { path = "crates/spri", version = "=0.1.0" }
+carrier-core = { path = "crates/carrier-core", version = "=0.1.1" }
+wbci         = { path = "crates/wbci", version = "=0.1.1" }
+spri         = { path = "crates/spri", version = "=0.1.1" }
 # Pull parser and writer; DTDs are refused by our reader, entities are never expanded.
 quick-xml = "0.42"
 # Civil dates and timestamps; Europe/Berlin is compiled in (`static`), so no system
