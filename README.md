@@ -44,7 +44,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 |---|---|---|---|
 | [`wbci`](crates/wbci) | WBCI 2.0 | provider ↔ provider: the § 59 TKG switch, number porting, the losing provider's check | complete |
 | [`spri`](crates/spri) | S/PRI 4.x | service provider ↔ network owner: open-access orders, faults, diagnostics, the provider switch | complete |
-| [`telco-interop`](crates/telco-interop) | both | one dependency for both, plus `Wechsel`: one switch across WBCI and S/PRI, the `cli` command line and its output as a library (`report`) | complete |
+| [`telco-interop`](crates/telco-interop) | both | one dependency for both, plus `Wechsel`: one switch across WBCI and S/PRI, the sandbox scenarios (`sim`), the `cli` command line and its output as a library (`report`) | complete |
 | [`carrier-core`](crates/carrier-core) | — | the shared foundation: ids, working-day calendar, hardened XML; used through the crates above | internal |
 | [`wita-kit`](crates/wita-kit) | WITA | service provider ↔ Deutsche Telekom | name reserved |
 
@@ -57,8 +57,9 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 | **Explained deadlines** | Arbeitstage and Werktage in German time, with every counted and skipped day |
 | **Processes** | a state machine per WBCI pre-agreement and per S/PRI order (Anlage 7 EPKs) |
 | **Across both** | `Wechsel`: one timeline, both interfaces' deadlines, six agreement checks |
-| **Command line** | read, check, explain codes, replay a switch: `brew install hupe1980/tap/telco-interop` or `cargo install telco-interop --features cli` |
-| **Playground** | [read, check and explain a payload in the browser](https://hupe1980.github.io/telco-interop/playground/): WebAssembly, nothing uploaded |
+| **Sandbox** | simulated peers (`wbci::sim`, `spri::sim`) and 13 scenarios that play whole switches and orders from both sides, every message valid and on time: test your side without a partner |
+| **Command line** | read, check, explain codes, replay a switch, write a scenario's files (`simulate`): `brew install hupe1980/tap/telco-interop` or `cargo install telco-interop --features cli` |
+| **Playground** | [read, check and explain a payload, or show a sandbox scenario, in the browser](https://hupe1980.github.io/telco-interop/playground/): WebAssembly, nothing uploaded |
 | **Hardened** | no DTDs, bounded input, fuzzed, no panics, no `unsafe`, personal data redacted |
 
 ## Documentation
@@ -67,6 +68,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
   [getting started](https://hupe1980.github.io/telco-interop/docs/start/getting-started/),
   [glossary](https://hupe1980.github.io/telco-interop/docs/start/glossary/),
   [command line](https://hupe1980.github.io/telco-interop/docs/start/command-line/),
+  [sandbox](https://hupe1980.github.io/telco-interop/docs/across-both/sandbox/),
   [playground](https://hupe1980.github.io/telco-interop/playground/)
 - API: [telco-interop](https://docs.rs/telco-interop), [wbci](https://docs.rs/wbci), [spri](https://docs.rs/spri)
 - Example: `cargo run -p wbci --example switch`
@@ -76,7 +78,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 ```sh
 just ci          # fmt, boundary, clippy, rustdoc, tests, MSRV, cargo-deny, package and site checks
 just example     # the switch end to end
-just schema      # validate both writers against the official XSDs (fetched, pinned by SHA-256)
+just schema      # validate both writers and the sandbox scenarios against the official XSDs (fetched, pinned by SHA-256)
 just fuzz 60     # fuzz both readers (nightly + cargo-fuzz)
 just bless       # regenerate the golden XML fixtures after an intended change
 just playground  # build the site's playground module (needs the wasm32-unknown-unknown target)

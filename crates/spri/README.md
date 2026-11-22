@@ -41,6 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 | **XML** | the four payloads, bare or in SOAP 1.1; byte-stable; 776 payloads validated against XSD 4.00.03 in CI; DTDs refused, input and attachments bounded, fuzzed |
 | **Lifecycle** | `Process` per order and role, after the EPKs of Anlage 7 V.13: what may follow what, refusals naming the ABBM to answer with, next actions, explained deadlines, history; `Abbm::outcome` |
 | **Validation** | 34 cited rules predict the network owner's refusal before sending — Storno/Terminverschiebung per business case, Auftragsklammer, Zeitfenster, wish date, follow-up order against its original, code against message type and case — each with path, source and the ABBM code: `Auftrag::issues_at`, `Auftrag::issues_against`, `Meldung::issues`, `Teq::issues` |
+| **Sandbox** | `sim::Leistungserbringer` and `sim::AbgebenderProvider`: a simulated network owner walking the EPK path of the business case (QEB, ABM, ERLM, ENTM; TAM to 1198; Storno and Terminverschiebung; the PV leg and its aborts 0041/0042) and the losing provider of a PV — driven by `Process`, time as an argument, every message inside its deadline |
 | **Codes** | the 215 codes of the Arbeitshandbuch S/PRI 4.x V2.9.5 with text, message types and business cases |
 | **With WBCI** | `VorabstimmungsId`, `LineId`, `CarrierCode` are the same types as in [`wbci`](https://crates.io/crates/wbci) |
 | **Safety** | personal and contact data redacted in `Debug`; `Anlage::safe_file_name()` against path traversal |

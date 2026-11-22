@@ -40,7 +40,45 @@ struct Open {
 }
 
 fn malformed(e: impl fmt::Display, offset: u64) -> XmlError {
-    XmlError { path: String::new(), offset: Some(offset), kind: XmlErrorKind::Malformed(e.to_string()) }
+    XmlError { path: String::new(), offset: Some(offset), kind: XmlErrorKind::Malformed(value_free(&e.to_string())) }
+}
+
+/// The parser's message with every quoted fragment of the input (between backticks, single or
+/// double quotes) that holds a letter or digit replaced by `…`: a broken document can merge a
+/// name or an address into what the parser quotes, and errors never contain values. Fragments
+/// of punctuation only (the quote characters the parser names) stay. The kind and the byte
+/// offset remain.
+fn value_free(message: &str) -> String {
+    let mut out = String::with_capacity(message.len());
+    let mut fragment = String::new();
+    let mut quote: Option<char> = None;
+    let close = |out: &mut String, fragment: &str| {
+        if fragment.chars().any(char::is_alphanumeric) {
+            out.push('…');
+        } else {
+            out.push_str(fragment);
+        }
+    };
+    for c in message.chars() {
+        match quote {
+            Some(q) if c == q => {
+                close(&mut out, &fragment);
+                fragment.clear();
+                out.push(c);
+                quote = None;
+            }
+            Some(_) => fragment.push(c),
+            None if matches!(c, '`' | '\'' | '"') => {
+                out.push(c);
+                quote = Some(c);
+            }
+            None => out.push(c),
+        }
+    }
+    if quote.is_some() {
+        close(&mut out, &fragment);
+    }
+    out
 }
 
 /// Parses `input` into a tree under `limits`. Elements whose local name is in `binary` carry
@@ -586,6 +624,22 @@ impl Node {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn malformed_messages_quote_no_input() {
+        // sandbox/SR-003
+        let m = super::value_free(
+            "ill-formed document: expected `</email\u{e}max@example.de</email>`, but `</a>` was found",
+        );
+        assert_eq!(m, "ill-formed document: expected `…`, but `…` was found");
+        assert_eq!(super::value_free("unclosed 'Mustermann"), "unclosed '…");
+        assert_eq!(
+            super::value_free("attribute value must be enclosed in `\"` or `'`"),
+            "attribute value must be enclosed in `\"` or `'`"
+        );
+        let e = super::parse(b"<a><b>Mustermann</c></a>", &crate::xml::Limits::default(), &[]).unwrap_err();
+        assert!(!e.to_string().contains("Mustermann") && !e.to_string().contains("</c>"), "{e}");
+    }
+
     use super::*;
 
     #[test]

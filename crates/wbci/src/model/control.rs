@@ -80,6 +80,17 @@ pub enum Payload {
 }
 
 impl Payload {
+    /// What the payload is, as the specifications name it: the business case of a request
+    /// (`VA-KUE-MRN`, `STR-AUF`, `TVS-VA`), the message type (`RUEM-VA`), or `TEQ`.
+    #[must_use]
+    pub fn kind(&self) -> &'static str {
+        match self {
+            Self::AnfrageRequest { anfrage, .. } => anfrage.geschaeftsfall().as_str(),
+            Self::MeldungRequest { meldung, .. } => meldung.meldungstyp().as_str(),
+            Self::AnfrageResponse { .. } | Self::MeldungResponse { .. } => "TEQ",
+        }
+    }
+
     /// The control data.
     #[must_use]
     pub const fn control(&self) -> &Control {

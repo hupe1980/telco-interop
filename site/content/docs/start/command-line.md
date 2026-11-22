@@ -1,6 +1,6 @@
 +++
 title = "Command line"
-description = "The telco-interop command: read and check WBCI and S/PRI files, explain a Meldungscode, replay one provider switch as a timeline with findings and deadlines."
+description = "The telco-interop command: read and check WBCI and S/PRI files, explain a Meldungscode, replay one provider switch as a timeline with findings and deadlines, write a sandbox scenario's files."
 weight = 4
 
 [extra]
@@ -8,8 +8,9 @@ seo_title = "WBCI and S/PRI on the command line · telco-interop"
 +++
 
 The `telco-interop` command puts the library in front of files: what a message is, whether it
-is valid, what a code means and where a switch stands. It reads only the files you name and
-prints no personal data — names, addresses, numbers and free text never appear in its output.
+is valid, what a code means and where a switch stands. It reads only the files you name, writes
+only the files of a scenario you ask for, and prints no personal data — names, addresses,
+numbers and free text never appear in its output.
 
 To try `read`, `check` and `code` without installing anything, use the
 [playground](@/playground.md): the same lines, computed in your browser. Both print through
@@ -132,12 +133,47 @@ Each party sees only the messages it sends or receives; files of another switch,
 party's leg, symbolic links and sub-folders are listed as skipped. A folder holds at most
 10 000 entries.
 
+## Simulate a switch
+
+`simulate` writes the files of a [sandbox scenario](@/docs/across-both/sandbox.md): every
+request, order, message and receipt of both sides as a synthetic payload, one file each, named
+in time order. `timeline` replays them from any party's view:
+
+```text
+$ telco-interop simulate --list
+wbci-agreed — VA-KUE-MRN checked against the losing provider's record: TEQ, RUEM-VA 8001, AKM-TR · Anl. 1 V5.4.1 §2.2–§2.6; WBCI 2.0 §12.3
+…
+wechsel — The switch across both: VA, RUEM-VA with the LineID, AKM-TR, PV for the switch date, the PV leg, completion on the switch date · S/PRI 4.4 §5.5.1.1 (p. 27); Anl. 1 V5.4.1 §2.6.2; § 59 TKG
+
+$ telco-interop simulate wechsel switch/
+wrote switch/001-wbci-ekpauf-va-kue-mrn.xml
+wrote switch/002-wbci-ekpabg-teq.xml
+…
+26 files of scenario wechsel; replay them with: telco-interop timeline switch/ --as ekpauf
+
+$ telco-interop timeline switch/ --as ekpauf
+Switch DEU.EKP1.V000000001, replayed as EKPauf
+…
+Findings: none
+Deadlines: none open
+…
+```
+
+| Option | Meaning |
+|---|---|
+| `--list` | the scenarios, one line each: name, what it shows, source |
+| `--start <date or RFC 3339>` | when the scenario starts; a date means 09:00 German time that day; default 2027-03-01. Every date follows from it |
+| `--force` | replace files of the same name; without it an existing file stops the command before anything is written |
+
+The folder is created if missing. Every file is created anew: with `--force` an existing entry
+is removed first — a symbolic link itself, never the file it points to.
+
 ## Exit codes
 
 | Code | Meaning |
 |---|---|
 | 0 | everything read, no finding, nothing overdue |
-| 1 | an error-level issue or finding, an overdue obligation, an unreadable file, or no switch to replay |
+| 1 | an error-level issue or finding, an overdue obligation, an unreadable file, no switch to replay, or (`simulate`) an existing file, an unknown scenario or a folder that cannot be written |
 | 2 | a usage error |
 
 A deadline that is only a window — the last moment for a Storno or a Terminverschiebung — does

@@ -66,6 +66,13 @@ record you found).
 | S/PRI order whose LineID equals its Vorabstimmungs-ID (LineID V1.4 §3.1.3) | an error, answered with 8144 („LineID ist nicht bekannt"): line codes and pre-agreement ids are distinct ranges | no check |
 | S/PRI receipt with `OK` and an error code | an error | allowed |
 | § 59 TKG continuity across WBCI and S/PRI | the S/PRI completion date stands in for the end of the outage (`wechsel.kontinuitaet`) | — |
+| Sandbox: when inside a deadline a simulated peer acts (the documents set only the deadline) | receipt after 2 s (at most 30 s S/PRI, 2 h WBCI), answer 1 h after the event and at least 1 s before its deadline; ERLM at 10:00 on the binding date; MTAM and ABBM 1198 one answer latency before their deadline; ABBM 0042 one after the antwortfrist; PV companion messages 1 s after their message | any other moment inside the deadline |
+| Sandbox: the antwortfrist of the AKM-PV (left to the contract, S/PRI 4.4 §5.5.1.1) | 3 Werktage after the day it is sent | another contractual period |
+| Sandbox: the receipt for a call a peer's process refuses | positive: the receipt confirms the technical receipt; the refusal is a message (ABBM with the process's code) | a negative receipt |
+| Sandbox: a refusal code that does not apply to the ABBM of that case | WBCI 8116 with the reason as `Begruendung` (WBCI 2.0 §11.5) | no answer |
+| Sandbox: bytes a peer cannot read | no payload back (operation and ids are unknown); the reading error names the receipt code | a TEQ without ids |
+| Sandbox: an S/PRI order whose validation predicts a refusal code | ABBM with those codes before the QEB | QEB and refusal later |
+| Sandbox: the S/PRI NEU scenarios | carry a Vorabstimmungs-ID: the new line of a switching customer (S/PRI 4.4 §5.5) | NEU without one |
 
 Report a different reading of the specifications as an issue: the crate follows the text, and
 corrections to an interpretation are welcome.

@@ -25,6 +25,9 @@ published schemas with `xmllint`.
 | The answers of the [losing provider's check](@/docs/wbci/pruefung.md) | 6 | — |
 | Generated variants | 240 | 120 |
 
+The [sandbox](@/docs/across-both/sandbox.md) scenarios are validated too: every payload of every
+scenario, played from two start times — 64 WBCI and 248 S/PRI payloads.
+
 A negative control proves the validator rejects a misordered element, so a silently passing
 `xmllint` cannot hide a broken test.
 
@@ -37,7 +40,7 @@ SHA-256; every CI run notices when a new version is published.
 ## Run it yourself
 
 ```sh
-just schema    # fetch both schemas, then validate both corpora (needs xmllint)
+just schema    # fetch both schemas, then validate both corpora and the scenarios (needs xmllint)
 ```
 
 Passing the schema is necessary, not sufficient: the [validation rules](@/docs/wbci/validation.md)

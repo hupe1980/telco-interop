@@ -1,0 +1,31 @@
+<env:annehmenMeldungRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:message="http://spri.telekom.de/oss/v4/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2027-03-02T12:00:06+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Sandbox CA, O=telco-interop</issuer>
+      <serial>1</serial>
+    </signaturId>
+  </control>
+  <meldung>
+    <auftragstyp>
+      <geschaeftsfall>NEU</geschaeftsfall>
+      <aenderungsKennzeichen>Storno</aenderungsKennzeichen>
+      <geschaeftsfallart>Bereitstellung</geschaeftsfallart>
+    </auftragstyp>
+    <meldungstyp xsi:type="message:MeldungstypABBMType">
+      <meldungsattribute>
+        <externeAuftragsnummer>SB-2027-0001</externeAuftragsnummer>
+        <auftraggebernummer>4711</auftraggebernummer>
+        <vorabstimmungId>DEU.EKP1.V000000001</vorabstimmungId>
+      </meldungsattribute>
+      <meldungspositionen>
+        <position>
+          <meldungscode>1087</meldungscode>
+          <meldungstext>Eine Stornierung ist nicht möglich.</meldungstext>
+        </position>
+      </meldungspositionen>
+    </meldungstyp>
+  </meldung>
+</env:annehmenMeldungRequest>

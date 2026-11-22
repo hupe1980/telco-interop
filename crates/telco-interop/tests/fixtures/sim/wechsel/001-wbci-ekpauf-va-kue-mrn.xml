@@ -1,0 +1,52 @@
+<env:annehmenAnfrageRequest xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:ar="http://www.vatm.de/wbci/v1/request" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2027-03-01T09:00:00+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Sandbox CA, O=telco-interop</issuer>
+      <serial>1</serial>
+    </signaturId>
+  </Control>
+  <Anfrage xsi:type="ar:KuendigungMitRNPGeschaeftsfallType">
+    <Absender>
+      <CarrierCode>DEU.EKP1</CarrierCode>
+    </Absender>
+    <Endkundenvertragspartner>
+      <EKPauf>
+        <CarrierCode>DEU.EKP1</CarrierCode>
+      </EKPauf>
+      <EKPabg>
+        <CarrierCode>DEU.EKP2</CarrierCode>
+      </EKPabg>
+    </Endkundenvertragspartner>
+    <VorabstimmungsId>DEU.EKP1.V000000001</VorabstimmungsId>
+    <Kundenwunschtermin>2027-04-07</Kundenwunschtermin>
+    <Endkunde>
+      <person>
+        <anrede>2</anrede>
+        <vorname>Erika</vorname>
+        <nachname>Musterfrau</nachname>
+      </person>
+    </Endkunde>
+    <Standort>
+      <strasse>
+        <strassenname>Musterweg</strassenname>
+        <hausnummer>1</hausnummer>
+      </strasse>
+      <postleitzahl>12345</postleitzahl>
+      <ort>Musterstadt</ort>
+    </Standort>
+    <RufnummernPortierung>
+      <einzelanschluss>
+        <rufnummernliste>
+          <zuPortierendeOnkzRnr>
+            <ONKZ>30</ONKZ>
+            <rufnummer>5550100</rufnummer>
+          </zuPortierendeOnkzRnr>
+        </rufnummernliste>
+      </einzelanschluss>
+      <Portierungszeitfenster>ZF2</Portierungszeitfenster>
+    </RufnummernPortierung>
+  </Anfrage>
+</env:annehmenAnfrageRequest>

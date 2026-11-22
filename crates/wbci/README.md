@@ -44,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 | **Deadlines** | every rule of Anlage 1 §2.5–§2.11 in German time, with counted and skipped days |
 | **Process** | state, next steps per side, open and overdue deadlines, refusals with codes, history |
 | **Losing provider's check** | `pruefung::check` decides the RUEM-VA or ABBM from your record: names by sound (AK S&P word rules, Kölner Phonetik), address, numbers, holders, explained field by field |
+| **Sandbox** | `sim::Ekpabg`: a simulated losing provider answering from your record or a forced outcome, confirming Storno and TVS-VA, refusing with the process's code — time as an argument, every answer inside its deadline |
 | **Codes** | all 36 Meldungscodes with text, message kind and the cases they answer |
 
 **[Guides](https://hupe1980.github.io/telco-interop/docs/wbci/)** ·

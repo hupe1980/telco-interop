@@ -1,7 +1,7 @@
 [package]
 name         = "spri"
 version.workspace = true
-description  = "S/PRI 4.x (AK S&P), the German open-access fibre interface, for Rust: typed, sans-I/O orders and all 20 message types, XML read and write against schema 4.00.03, cited validation, the order lifecycle of Anlage 7 and the 215 message codes."
+description  = "S/PRI 4.x (AK S&P), the German open-access fibre interface, for Rust: typed, sans-I/O orders and all 20 message types, XML read and write against schema 4.00.03, cited validation, the order lifecycle of Anlage 7, the 215 message codes and a simulated network owner for testing."
 keywords     = ["spri", "telecom", "open-access", "ftth", "carrier"]
 categories   = ["encoding", "parser-implementations", "network-programming"]
 readme       = "README.md"

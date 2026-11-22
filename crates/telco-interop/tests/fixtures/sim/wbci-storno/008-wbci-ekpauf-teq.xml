@@ -1,0 +1,22 @@
+<env:annehmenMeldungResponse xmlns:env="http://www.vatm.de/wbci/v1/envelope" xmlns:am="http://www.vatm.de/wbci/v1/message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <zeitstempel>2027-03-02T11:00:06+01:00</zeitstempel>
+    <majorRelease>02</majorRelease>
+    <minorRelease>00</minorRelease>
+    <signaturId>
+      <issuer>CN=Sandbox CA, O=telco-interop</issuer>
+      <serial>1</serial>
+    </signaturId>
+  </Control>
+  <Quittung>
+    <Absender>
+      <CarrierCode>DEU.EKP1</CarrierCode>
+    </Absender>
+    <VorabstimmungsIdRef>DEU.EKP1.V000000001</VorabstimmungsIdRef>
+    <Position xsi:type="am:MeldungsPositionTEQType">
+      <Meldungscode>OK</Meldungscode>
+      <Meldungstext>OK.</Meldungstext>
+    </Position>
+    <StornoIdRef>DEU.EKP1.S000000001</StornoIdRef>
+  </Quittung>
+</env:annehmenMeldungResponse>

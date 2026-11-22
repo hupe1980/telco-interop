@@ -1,6 +1,6 @@
 [package]
 name         = "playground"
-description  = "The site's in-browser playground: telco_interop::report compiled to WebAssembly. Not published."
+description  = "The site's in-browser playground: telco_interop::report and the sandbox scenarios compiled to WebAssembly. Not published."
 publish      = false
 version.workspace      = true
 edition.workspace      = true

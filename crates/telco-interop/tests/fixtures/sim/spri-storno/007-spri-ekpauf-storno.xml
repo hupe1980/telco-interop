@@ -1,0 +1,57 @@
+<env:annehmenAuftragRequest xmlns:env="http://spri.telekom.de/oss/v4/envelope" xmlns:order="http://spri.telekom.de/oss/v4/order" xmlns:fttx="http://spri.telekom.de/oss/v4/fttx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <control>
+    <zeitstempel>2027-03-02T11:00:04+01:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Sandbox CA, O=telco-interop</issuer>
+      <serial>1</serial>
+    </signaturId>
+  </control>
+  <auftrag>
+    <externeAuftragsnummer>SB-2027-0001</externeAuftragsnummer>
+    <auftraggeber>
+      <auftraggebernummer>4711</auftraggebernummer>
+      <leistungsnummer>RV-1</leistungsnummer>
+    </auftraggeber>
+    <geschaeftsfall xsi:type="order:BereitstellungType">
+      <vorabstimmungId>DEU.EKP1.V000000001</vorabstimmungId>
+      <ansprechpartner>
+        <auftragsmanagement>
+          <anrede>1</anrede>
+          <nachname>Auftragsmanagement</nachname>
+          <telefonnummer>030 5550200</telefonnummer>
+        </auftragsmanagement>
+      </ansprechpartner>
+      <termine>
+        <auftraggeberWunschtermin>
+          <datum>2027-03-22</datum>
+        </auftraggeberWunschtermin>
+      </termine>
+      <auftragsposition>
+        <produkt xsi:type="fttx:ProduktFTTXType">
+          <bezeichner>FTTH 1000</bezeichner>
+        </produkt>
+        <geschaeftsfallProdukt xsi:type="fttx:FTTXBereitstellungType">
+          <standortA>
+            <person>
+              <anrede>2</anrede>
+              <vorname>Erika</vorname>
+              <nachname>Musterfrau</nachname>
+            </person>
+            <strasse>
+              <strassenname>Musterweg</strassenname>
+              <hausnummer>1</hausnummer>
+            </strasse>
+            <postleitzahl>12345</postleitzahl>
+            <ort>
+              <ortsname>Musterstadt</ortsname>
+            </ort>
+          </standortA>
+        </geschaeftsfallProdukt>
+      </auftragsposition>
+    </geschaeftsfall>
+    <geschaeftsfallArt>Bereitstellung</geschaeftsfallArt>
+    <aenderungskennzeichen>Storno</aenderungskennzeichen>
+  </auftrag>
+</env:annehmenAuftragRequest>

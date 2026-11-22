@@ -37,6 +37,13 @@
 //! the AKM-TR takes over, the dates, postponement in WBCI first, a WBCI cancellation reaching
 //! S/PRI, completion within a working day of the switch date). See the [`wechsel`] module.
 //!
+//! ## A sandbox: [`sim`]
+//!
+//! [`sim`] (both features) is a catalogue of named scenarios that play a whole switch or order
+//! from both sides against simulated peers ([`wbci::sim`], [`spri::sim`]): every request, order,
+//! message and receipt with its time, each valid and inside its deadline — to test your own
+//! side without a partner. `telco-interop simulate` writes them as files.
+//!
 //! ## The command line's output as a library: [`report`]
 //!
 //! [`report`] (feature `report`, not on by default) turns payload bytes into the lines
@@ -75,6 +82,10 @@ pub mod report;
 
 #[cfg(all(feature = "wbci", feature = "spri"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "wbci", feature = "spri"))))]
+pub mod sim;
+
+#[cfg(all(feature = "wbci", feature = "spri"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "wbci", feature = "spri"))))]
 #[doc(inline)]
 pub use wechsel::{Aktion, Befund, Eintrag, Frist, FristDetail, Mismatch, Partei, Richtung, Schnittstelle, Wechsel};
 
@@ -87,4 +98,6 @@ mod site_guides {
     struct Readme;
     #[doc = include_str!("../../../site/content/docs/across-both/one-switch.md")]
     struct Wechsel;
+    #[doc = include_str!("../../../site/content/docs/across-both/sandbox.md")]
+    struct Sandbox;
 }

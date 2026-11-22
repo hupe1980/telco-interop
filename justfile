@@ -52,11 +52,13 @@ schema:
     WBCI_XSD_REQUIRED=1 cargo test -p wbci --test schema -- --nocapture
     bash scripts/fetch-spri-xsd.sh
     SPRI_XSD_REQUIRED=1 cargo test -p spri --test schema -- --nocapture
+    WBCI_XSD_REQUIRED=1 SPRI_XSD_REQUIRED=1 cargo test -p telco-interop --test sim_schema -- --nocapture
 
-# Regenerate the golden XML fixtures after an intended writer change; review the diff.
+# Regenerate the golden XML fixtures (and the sandbox scenarios' files) after an intended change; review the diff.
 bless:
     WBCI_BLESS=1 cargo test -p wbci --test roundtrip
     SPRI_BLESS=1 cargo test -p spri --test roundtrip
+    SIM_BLESS=1 cargo test -p telco-interop --test sim the_files_equal_the_golden_fixtures
 
 # Fuzz both readers (nightly + cargo-fuzz), seeded from the fixtures.
 fuzz SECONDS="60":

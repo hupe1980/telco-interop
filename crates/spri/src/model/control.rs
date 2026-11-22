@@ -85,6 +85,21 @@ pub enum Payload {
 }
 
 impl Payload {
+    /// What the payload is, as the specifications name it: the business case of a standard
+    /// order (`PV`), `Storno` or `Terminverschiebung`, the message type (`ABM`), or `TEQ`.
+    #[must_use]
+    pub fn kind(&self) -> &'static str {
+        match self {
+            Self::AuftragRequest { auftrag, .. } => match auftrag.aenderungskennzeichen {
+                crate::Aenderungskennzeichen::Standard => auftrag.geschaeftsfall.code().as_str(),
+                crate::Aenderungskennzeichen::Storno => "Storno",
+                crate::Aenderungskennzeichen::Terminverschiebung => "Terminverschiebung",
+            },
+            Self::MeldungRequest { meldung, .. } => meldung.typ().as_str(),
+            Self::AuftragResponse { .. } | Self::MeldungResponse { .. } => "TEQ",
+        }
+    }
+
     /// The control data.
     #[must_use]
     pub const fn control(&self) -> &Control {

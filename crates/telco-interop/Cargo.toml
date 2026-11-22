@@ -1,7 +1,7 @@
 [package]
 name         = "telco-interop"
 version.workspace = true
-description  = "The German telecom carrier interfaces in one dependency: WBCI (the § 59 TKG provider switch) and S/PRI (open-access orders), re-exported behind features, with the types they share."
+description  = "The German telecom carrier interfaces in one dependency: WBCI (the § 59 TKG provider switch) and S/PRI (open-access orders), re-exported behind features, with the types they share, one switch across both and a sandbox of scenarios against simulated peers."
 keywords     = ["telecom", "wbci", "spri", "carrier", "tkg"]
 categories   = ["encoding", "parser-implementations", "network-programming"]
 readme       = "README.md"

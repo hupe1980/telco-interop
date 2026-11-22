@@ -17,6 +17,7 @@ their own API. This crate holds what WBCI and S/PRI share, so a fix in one is a 
 | `calendar` | German working days: nationwide public holidays (Easter computed), Mon–Fri or Mon–Sat, closing days |
 | `count` | working-day and working-hour arithmetic with an `Explanation` a person can check by hand |
 | `envelope` | `Zeitstempel`, `SignaturId`, `SignaturText` |
+| `sim` | `Latency`, the timing of the simulated peers in `wbci::sim` and `spri::sim` |
 | `xml` | a bounded tree parser that refuses DTDs and resolves only the five predefined entities, a cursor that walks elements in schema order, an indenting writer |
 
 No I/O, no clock, no global state. The API serves the sibling crates and is not stable on its

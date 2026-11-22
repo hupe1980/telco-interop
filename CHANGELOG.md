@@ -4,6 +4,64 @@ All notable changes to the crates in this repository. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer, with
 breaking changes allowed before 1.0.
 
+## telco-interop 0.1.3 — 2026-11-22
+
+### Added
+
+- `telco_interop::sim`: 13 named scenarios, each citing its source, that play a whole switch
+  or order from both sides against the simulated peers — WBCI agreed, refused (8103), Storno,
+  TVS-VA; S/PRI NEU, TAM to 1198, Storno confirmed and refused, Terminverschiebung, PV, PV
+  refused (0041) and timed out (0042); the switch across both. Every message validates, is
+  valid against both official schemas, meets its deadline and is accepted by every party's
+  process.
+- `telco-interop simulate <scenario> <folder>` writes a scenario's files, named in time order
+  (`--start` with a date or an RFC 3339 timestamp; an existing file is replaced only with
+  `--force`, never through a symbolic link); `simulate --list` prints the catalogue.
+- The [playground](https://hupe1980.github.io/telco-interop/playground/) shows each scenario's
+  messages (Simulate).
+
+## wbci 0.1.3 — 2026-11-22
+
+### Added
+
+- `wbci::sim::Ekpabg`, a simulated losing provider: answers a pre-agreement from your record
+  (`pruefung::check`) or with a forced outcome, confirms a Storno or TVS-VA, refuses what the
+  process forbids with the code it names, every message inside its deadline. Time is an
+  argument (`receive`, `next_due`, `advance`).
+- `Payload::kind`: what a payload is (`VA-KUE-MRN`, `RUEM-VA`, `TEQ`, …).
+
+### Fixed
+
+- A read error for malformed XML quotes no fragment of the document, which a broken payload
+  could fill with a name or an address; the kind of error and its byte offset remain.
+
+## spri 0.1.3 — 2026-11-22
+
+### Added
+
+- `spri::sim::Leistungserbringer`, a simulated network owner on the EPK path of the business
+  case (QEB, ABM, ERLM, ENTM; TAM, MTAM, ABBM 1198; Storno and Terminverschiebung confirmed or
+  refused; the PV leg and its aborts 0041/0042), and `spri::sim::AbgebenderProvider`, the losing
+  provider answering the AKM-PV with consent, refusal or silence. Time is an argument; every
+  message is inside its deadline.
+- `Payload::kind`: what a payload is (`PV`, `Storno`, `ABM`, `TEQ`, …).
+
+### Fixed
+
+- A read error for malformed XML quotes no fragment of the document; the kind of error and its
+  byte offset remain.
+
+## carrier-core 0.1.3 — 2026-11-22
+
+### Added
+
+- `sim::Latency`: when the simulated peers send receipts and answers.
+
+### Fixed
+
+- Malformed-XML messages are value-free: quoted fragments holding a letter or digit are
+  replaced by `…`.
+
 ## telco-interop 0.1.2 — 2026-11-22
 
 ### Added

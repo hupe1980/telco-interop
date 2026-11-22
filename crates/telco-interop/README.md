@@ -50,6 +50,28 @@ Di 24.11.2026 10:00 WBCI EKPabg → RUEM-VA 8001
 **[Guide](https://hupe1980.github.io/telco-interop/docs/across-both/one-switch/)** ·
 **[All guides](https://hupe1980.github.io/telco-interop/)** · **[API](https://docs.rs/telco-interop)**
 
+## Sandbox
+
+`telco_interop::sim` plays 13 named scenarios from both sides against simulated peers
+(`wbci::sim`, `spri::sim`), to test your side without a partner: WBCI agreed, refused, Storno
+and TVS-VA; S/PRI NEU, TAM to 1198, Storno, Terminverschiebung, PV, its refusal and timeout;
+the switch across both. Every message validates, is valid against both official schemas and
+meets its deadline.
+
+```rust
+use telco_interop::sim;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let ablauf = sim::szenario("spri-pv").ok_or("no such scenario")?.play(sim::START);
+    for nachricht in &ablauf.nachrichten {
+        println!("{nachricht}"); // Mo 01.03.2027 09:00 S/PRI EKPauf → Netzbetreiber PV, …
+    }
+    Ok(())
+}
+```
+
+**[Guide](https://hupe1980.github.io/telco-interop/docs/across-both/sandbox/)**
+
 ## Command line
 
 The `cli` feature (not on by default) adds the `telco-interop` command:
@@ -60,6 +82,7 @@ telco-interop read abbm.xml                  # what a file is, or the TEQ code t
 telco-interop check va.xml auftrag.xml       # WBCI and S/PRI validation issues, with rule, source and code
 telco-interop code 8103                      # a Meldungscode in WBCI and S/PRI
 telco-interop timeline --as ekpauf switch/   # one switch replayed: timeline, findings, deadlines
+telco-interop simulate wechsel switch/       # a sandbox scenario's files, both sides (--list for all)
 ```
 
 It prints no personal data and exits 1 on an error, a finding or an overdue obligation.

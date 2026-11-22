@@ -1,4 +1,4 @@
-// The playground: telco_interop::report as WebAssembly. Everything runs here; the only request
+// The playground: telco_interop::report and the sandbox scenarios as WebAssembly. Everything runs here; the only request
 // is the module itself. Results are inserted as text (textContent), never as markup.
 const $ = (id) => document.getElementById(id);
 const status = $('pg-status');
@@ -89,6 +89,16 @@ async function main() {
   const lookup = () => show(wasm, () => wasm.pg_code(put(wasm, encoder.encode(code.value.trim())), Number($('pg-scope').value)), 'Code lookup');
   $('pg-lookup').addEventListener('click', lookup);
   code.addEventListener('keydown', (e) => { if (e.key === 'Enter') lookup(); });
+  // Simulate: the scenarios of telco_interop::sim, played from sim::START.
+  const scenarios = $('pg-scenario');
+  for (let i = 0; wasm.pg_scenario(i, 0) === 1; i++) {
+    scenarios.add(new Option(text(wasm), String(i)));
+  }
+  $('pg-simulate').addEventListener('click', () => {
+    if (scenarios.value === '' || wasm.pg_scenario(Number(scenarios.value), 1) !== 1) return;
+    output.textContent = text(wasm);
+    status.textContent = 'Simulate: the messages of both sides, in time order (synthetic data).';
+  });
   for (const el of document.querySelectorAll('.playground [disabled]')) el.disabled = false;
   status.textContent = 'Ready. Nothing you enter leaves this page.';
 }

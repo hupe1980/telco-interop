@@ -16,6 +16,7 @@
 //! | look up a code | [`Meldungscode`] |
 //! | store an attachment | [`Anlage::safe_file_name`] |
 //! | follow an order's lifecycle: what may come next, what is due | [`process::Process`], [`deadline`], [`Abbm::outcome`] |
+//! | test your side against a simulated network owner and losing provider | [`sim::Leistungserbringer`], [`sim::AbgebenderProvider`] |
 //! | know whether the network owner will refuse it | [`Auftrag::issues_at`], [`Auftrag::issues_against`], [`Meldung::issues`] → [`Issue`] |
 //!
 //! ## A provider switch after WBCI
@@ -133,6 +134,7 @@ mod code;
 pub mod deadline;
 mod model;
 pub mod process;
+pub mod sim;
 pub mod validate;
 mod values;
 pub mod xml;

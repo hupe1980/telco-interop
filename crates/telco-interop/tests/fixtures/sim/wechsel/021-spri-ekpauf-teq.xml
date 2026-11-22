@@ -1,0 +1,22 @@
+<env:annehmenMeldungResponse xmlns:env="http://spri.telekom.de/oss/v4/envelope">
+  <control>
+    <zeitstempel>2027-04-07T10:00:02+02:00</zeitstempel>
+    <majorRelease>04</majorRelease>
+    <minorRelease>04</minorRelease>
+    <signaturId>
+      <issuer>CN=Sandbox CA, O=telco-interop</issuer>
+      <serial>1</serial>
+    </signaturId>
+  </control>
+  <quittung>
+    <meldungsTyp>TEQ</meldungsTyp>
+    <externeAuftragsnummer>SB-2027-0001</externeAuftragsnummer>
+    <auftraggebernummer>4711</auftraggebernummer>
+    <meldungspositionen>
+      <position>
+        <meldungscode>OK</meldungscode>
+        <meldungstext>OK.</meldungstext>
+      </position>
+    </meldungspositionen>
+  </quittung>
+</env:annehmenMeldungResponse>

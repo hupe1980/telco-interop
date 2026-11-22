@@ -308,3 +308,22 @@ fn a_length_past_the_buffer_reads_only_the_buffer() {
     let huge = vec![b' '; input_limit() + 10];
     assert_eq!(prefix(&huge, input_limit()).len(), input_limit());
 }
+
+// -- the sandbox view -----------------------------------------------------------------------
+
+#[test]
+fn every_scenario_is_listed_and_shown_as_the_library_prints_it() {
+    let catalogue = telco_interop::sim::katalog();
+    for (i, s) in catalogue.iter().enumerate() {
+        let title = playground::scenario(i, 0).unwrap();
+        assert!(title.starts_with(s.name), "{title}");
+        let lines = playground::scenario(i, 1).unwrap();
+        let expected: Vec<String> =
+            s.play(telco_interop::sim::START).nachrichten.iter().map(ToString::to_string).collect();
+        assert_eq!(lines, expected.join("\n"));
+        for secret in ["Musterfrau", "Erika", "Musterweg", "12345", "Musterstadt", "5550100"] {
+            assert!(!lines.contains(secret), "{secret} in {}", s.name);
+        }
+    }
+    assert!(playground::scenario(catalogue.len(), 0).is_none());
+}

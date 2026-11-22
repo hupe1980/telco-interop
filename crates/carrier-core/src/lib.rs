@@ -13,6 +13,7 @@
 //! | [`count`] | working-day and working-hour arithmetic with an [`count::Explanation`] |
 //! | [`envelope`] | [`Zeitstempel`], [`SignaturId`], [`SignaturText`] |
 //! | [`xml`] | the bounded tree parser, the schema-order cursor and the writer |
+//! | [`sim`] | [`sim::Latency`] of the simulated peers |
 //!
 //! Its API serves the sibling crates `wbci` and `spri`, which re-export what their users need;
 //! it is not stable on its own.
@@ -32,6 +33,7 @@ pub mod calendar;
 pub mod count;
 pub mod envelope;
 pub mod id;
+pub mod sim;
 pub mod text;
 pub mod xml;
 

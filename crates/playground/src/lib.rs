@@ -1,9 +1,10 @@
 //! The site's playground: [`telco_interop::report`] compiled to WebAssembly, so a visitor can
 //! read, check and explain a WBCI or S/PRI payload in the browser. Not published.
 //!
-//! [`run`] is the whole behaviour, a pure function over bytes; the `abi` module (compiled for
-//! `wasm32` only) hands bytes in and text out through two module-owned buffers. The output is
-//! exactly the lines `telco-interop read`, `check` and `code` print, joined by `\n`.
+//! [`run`] is the whole behaviour, a pure function over bytes, and [`scenario`] gives the sandbox
+//! view; the `abi` module (compiled for `wasm32` only) hands bytes in and text out through two
+//! module-owned buffers. The output is exactly the lines `telco-interop read`, `check` and
+//! `code` print, joined by `\n`.
 //!
 //! # Why this crate allows `unsafe_code` at all
 //!
@@ -111,6 +112,20 @@ pub const EXAMPLES: &[Example] = &[
     example!("S/PRI · TEQ for an order", "spri", "teq-auftrag.xml"),
 ];
 
+/// Scenario `index` of the sandbox catalogue: its title line (`part` 0) or its messages, one
+/// line each, played from [`telco_interop::sim::START`] (else), or `None` past the end.
+#[must_use]
+pub fn scenario(index: usize, part: u32) -> Option<String> {
+    let s = telco_interop::sim::katalog().get(index)?;
+    if part == 0 {
+        return Some(format!("{} — {} · {}", s.name, s.beschreibung, s.quelle));
+    }
+    let ablauf = s.play(telco_interop::sim::START);
+    let mut lines: Vec<String> = ablauf.nachrichten.iter().map(|n| report::sanitize(&n.to_string())).collect();
+    lines.extend(ablauf.abgelehnt.iter().map(|r| report::sanitize(&format!("refused: {r}"))));
+    Some(lines.join("\n"))
+}
+
 /// The exports the page script calls (see `site/static/playground/playground.js`).
 ///
 /// Protocol: `pg_input(n)` sizes the input buffer to `min(n, pg_input_limit())` zero bytes and
@@ -118,7 +133,8 @@ pub const EXAMPLES: &[Example] = &[
 /// `pg_code(n, scope)` runs on the first `n` of them (clamped to the buffer) and returns `0`
 /// (passed) or `1` (failed); the text is at `pg_output_ptr()`, `pg_output_len()` bytes long.
 /// `pg_example(i, part)` puts example `i`'s label (`part` 0) or payload (else) into the output
-/// buffer and returns `1`, or `0` past the end.
+/// buffer and returns `1`, or `0` past the end; `pg_scenario(i, part)` does the same for the
+/// sandbox scenario's title or messages.
 #[cfg(target_arch = "wasm32")]
 pub mod abi {
     use std::sync::{Mutex, MutexGuard, PoisonError};
@@ -195,6 +211,17 @@ pub mod abi {
         let Some(e) = EXAMPLES.get(index) else { return 0 };
         let text = if part == 0 { e.label } else { e.payload };
         *lock(&OUTPUT) = text.as_bytes().to_vec();
+        1
+    }
+
+    /// Scenario `index`'s title (`part` 0) or timeline (else) into the output buffer: `1`, or
+    /// `0` past the end.
+    // SAFETY: the unmangled name `pg_scenario` is unique in the module; the body is safe Rust.
+    #[allow(unsafe_code)]
+    #[unsafe(no_mangle)]
+    pub extern "C" fn pg_scenario(index: usize, part: u32) -> u32 {
+        let Some(text) = super::scenario(index, part) else { return 0 };
+        *lock(&OUTPUT) = text.into_bytes();
         1
     }
 

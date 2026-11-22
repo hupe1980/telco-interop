@@ -1,12 +1,14 @@
-//! `telco-interop`: read and check WBCI and S/PRI files, explain a code, and replay the files
-//! of one provider switch as a timeline with findings and deadlines.
+//! `telco-interop`: read and check WBCI and S/PRI files, explain a code, replay the files of one
+//! provider switch as a timeline with findings and deadlines, and write a sandbox scenario's
+//! files.
 //!
 //! The binary is the I/O boundary of the sans-I/O crates: it reads the files it is given and
-//! prints to standard output; it writes no file, opens no connection and reads no clock (the
-//! replay's "now" is `--now` or the latest control timestamp). Every printed line passes
-//! [`out`], which replaces control characters taken from the input. What `read`, `check` and
-//! `code` print comes from `telco_interop::report` (shared with the site's playground): kinds,
-//! ids, dates and codes, never names, addresses, phone numbers or free text.
+//! prints to standard output; only `simulate` writes files, into the folder it is given. It
+//! opens no connection and reads no clock (the replay's "now" is `--now` or the latest control
+//! timestamp; a scenario starts at `--start` or `telco_interop::sim::START`). Every printed line
+//! passes [`out`], which replaces control characters taken from the input. What `read`, `check`
+//! and `code` print comes from `telco_interop::report` (shared with the site's playground):
+//! kinds, ids, dates and codes, never names, addresses, phone numbers or free text.
 
 use std::fmt::Display;
 use std::io::Write as _;
@@ -17,11 +19,12 @@ use clap::{Parser, Subcommand, ValueEnum};
 use telco_interop::{Partei, report, wbci};
 
 mod input;
+mod simulate;
 mod timeline;
 
-/// Read, check and explain WBCI and S/PRI files; replay a provider switch.
+/// Read, check and explain WBCI and S/PRI files; replay a provider switch; simulate one.
 #[derive(Parser)]
-#[command(name = "telco-interop", version, about = "Read, check and explain WBCI and S/PRI files; replay a provider switch.", long_about = None)]
+#[command(name = "telco-interop", version, about = "Read, check and explain WBCI and S/PRI files; replay a provider switch; simulate one.", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -68,6 +71,26 @@ enum Command {
         #[arg(long, value_parser = parse_now)]
         now: Option<wbci::Timestamp>,
     },
+    /// Write the files of a sandbox scenario (synthetic data, both sides, names in time order),
+    /// or list the scenarios.
+    Simulate {
+        /// The scenario, e.g. spri-pv (see --list).
+        #[arg(required_unless_present = "list")]
+        scenario: Option<String>,
+        /// The folder to write into; created if missing.
+        #[arg(required_unless_present = "list")]
+        out_dir: Option<PathBuf>,
+        /// List the scenarios with what they show and their source.
+        #[arg(long, conflicts_with_all = ["scenario", "out_dir", "force", "start"])]
+        list: bool,
+        /// Replace files of the same name (never writing through a symbolic link).
+        #[arg(long)]
+        force: bool,
+        /// When the scenario starts: an RFC 3339 timestamp, or a date (09:00 German time that
+        /// day); default: Monday 01.03.2027 09:00 German time.
+        #[arg(long, value_parser = parse_start)]
+        start: Option<wbci::Timestamp>,
+    },
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -94,6 +117,16 @@ fn parse_now(s: &str) -> Result<wbci::Timestamp, String> {
     s.parse().map_err(|e| format!("not an RFC 3339 timestamp: {e}"))
 }
 
+/// A timestamp, or a date meaning 09:00 German time that day (the default start's time of day).
+fn parse_start(s: &str) -> Result<wbci::Timestamp, String> {
+    if let Ok(day) = s.parse::<wbci::Date>() {
+        let midnight = carrier_core::count::start_of(day).as_second();
+        return wbci::Timestamp::from_second(midnight.saturating_add(9 * 3600))
+            .map_err(|_| format!("{s} is out of range"));
+    }
+    parse_now(s).map_err(|e| format!("{e} (or a date, e.g. 2027-03-01)"))
+}
+
 /// Prints one line. Every character from the input passes here: control characters (C0, DEL,
 /// C1) become U+FFFD, so no file can move the cursor, clear the screen or hide output.
 fn out(line: impl Display) {
@@ -109,6 +142,9 @@ fn main() -> ExitCode {
         Command::Check { files } => check(&files),
         Command::Code { code, wbci, spri } => code_cmd(&code, !spri, !wbci),
         Command::Timeline { inputs, party, now } => timeline_cmd(&inputs, party.into(), now),
+        Command::Simulate { scenario, out_dir, list, force, start } => {
+            simulate_cmd(scenario.as_deref(), out_dir.as_deref(), list, force, start)
+        }
     };
     if ok { ExitCode::SUCCESS } else { ExitCode::FAILURE }
 }
@@ -154,6 +190,49 @@ fn code_cmd(code: &str, in_wbci: bool, in_spri: bool) -> bool {
         out(line);
     }
     r.ok
+}
+
+// -- simulate -------------------------------------------------------------------------------
+
+fn simulate_cmd(
+    scenario: Option<&str>,
+    out_dir: Option<&std::path::Path>,
+    list: bool,
+    force: bool,
+    start: Option<wbci::Timestamp>,
+) -> bool {
+    if list {
+        for s in telco_interop::sim::katalog() {
+            out(format_args!("{} — {} · {}", s.name, s.beschreibung, s.quelle));
+        }
+        return true;
+    }
+    let (Some(name), Some(dir)) = (scenario, out_dir) else {
+        out("error: give a scenario and a folder, or --list");
+        return false;
+    };
+    let Some(found) = telco_interop::sim::szenario(name) else {
+        out(format_args!("error: no scenario {name} (see simulate --list)"));
+        return false;
+    };
+    match simulate::write(found, dir, start.unwrap_or(telco_interop::sim::START), force) {
+        Ok(paths) => {
+            for p in &paths {
+                out(format_args!("wrote {}", p.display()));
+            }
+            out(format_args!(
+                "{} files of scenario {}; replay them with: telco-interop timeline {} --as ekpauf",
+                paths.len(),
+                found.name,
+                dir.display()
+            ));
+            true
+        }
+        Err(e) => {
+            out(format_args!("error: {e}"));
+            false
+        }
+    }
 }
 
 // -- timeline -------------------------------------------------------------------------------

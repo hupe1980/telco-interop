@@ -18,6 +18,7 @@
 //! | follow a switch through its life | [`Process`] |
 //! | answer a pre-agreement as the losing provider | [`pruefung::check`] |
 //! | look up a code | [`Meldungscode`] |
+//! | test your gaining-provider side against a simulated losing provider | [`sim::Ekpabg`] |
 //!
 //! ## A switch in twenty lines
 //!
@@ -104,6 +105,7 @@ mod id;
 mod model;
 pub mod process;
 pub mod pruefung;
+pub mod sim;
 mod text;
 pub mod validate;
 mod values;

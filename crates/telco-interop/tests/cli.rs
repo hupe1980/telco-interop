@@ -705,3 +705,145 @@ fn check_judges_dates_at_the_files_own_timestamp() {
     let (out, code) = run(&[Path::new("check"), &spri_fixture("auftrag-pv.xml"), &wbci_fixture("va-kue-mrn.xml")]);
     assert_eq!(code, 0, "{out}");
 }
+
+// -- simulate -------------------------------------------------------------------------------
+
+fn names() -> Vec<&'static str> {
+    telco_interop::sim::katalog().iter().map(|s| s.name).collect()
+}
+
+#[test]
+fn simulate_lists_the_catalogue() {
+    let (out, code) = run(&["simulate", "--list"]);
+    assert_eq!(code, 0, "{out}");
+    assert_eq!(out.lines().count(), names().len(), "{out}");
+    for (line, s) in out.lines().zip(telco_interop::sim::katalog()) {
+        assert_eq!(line, format!("{} — {} · {}", s.name, s.beschreibung, s.quelle));
+    }
+    let (out, code) = run(&["simulate", "--list", "spri-pv"]);
+    assert_eq!(code, 2, "--list takes no scenario: {out}");
+    let (out, code) = run(&["simulate", "spri-pv"]);
+    assert_eq!(code, 2, "a folder is required: {out}");
+}
+
+#[test]
+fn simulate_writes_files_in_time_order_and_never_overwrites() {
+    // sandbox/SR-006
+    let dir = temp("simulate");
+    let target = dir.join("pv");
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-pv"), &target]);
+    assert_eq!(code, 0, "{out}");
+    contains_all(&out, &["wrote ", "001-spri-ekpauf-pv.xml", "20 files of scenario spri-pv", "telco-interop timeline"]);
+    let files = fixtures(&target);
+    assert_eq!(files.len(), 20);
+    let first = fs::read_to_string(&files[0]).unwrap();
+    assert!(first.contains("PV") || first.contains("ProviderwechselType"), "{first}");
+
+    // A second run without --force refuses and changes nothing.
+    fs::write(&files[0], "mine").unwrap();
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-pv"), &target]);
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["error: ", "001-spri-ekpauf-pv.xml exists (use --force"]);
+    assert_eq!(fs::read_to_string(&files[0]).unwrap(), "mine");
+    assert_eq!(fixtures(&target).len(), 20);
+
+    // --force replaces them.
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-pv"), &target, Path::new("--force")]);
+    assert_eq!(code, 0, "{out}");
+    assert_eq!(fs::read_to_string(&files[0]).unwrap(), first);
+
+    // An unknown scenario points to the list.
+    let (out, code) = run(&[Path::new("simulate"), Path::new("nope"), &target]);
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["no scenario nope (see simulate --list)"]);
+
+    // A folder below a regular file cannot be created.
+    let file = dir.join("plain.txt");
+    fs::write(&file, "x").unwrap();
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-neu"), &file.join("sub")]);
+    assert_eq!(code, 1, "{out}");
+    contains_all(&out, &["cannot create the folder"]);
+}
+
+#[cfg(unix)]
+#[test]
+fn simulate_never_writes_through_a_link() {
+    // sandbox/SR-006
+    let dir = temp("simulate-link");
+    let outside = dir.join("outside.txt");
+    fs::write(&outside, "keep").unwrap();
+    let target = dir.join("neu");
+    fs::create_dir(&target).unwrap();
+    let link = target.join("001-spri-ekpauf-neu.xml");
+    std::os::unix::fs::symlink(&outside, &link).unwrap();
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-neu"), &target]);
+    assert_eq!(code, 1, "a link is an existing entry: {out}");
+    let (out, code) = run(&[Path::new("simulate"), Path::new("spri-neu"), &target, Path::new("--force")]);
+    assert_eq!(code, 0, "{out}");
+    assert_eq!(fs::read_to_string(&outside).unwrap(), "keep");
+    assert!(fs::symlink_metadata(&link).unwrap().is_file(), "the link was replaced by a file");
+}
+
+#[cfg(unix)]
+#[test]
+fn simulate_prints_no_control_characters() {
+    // sandbox/SR-007
+    let dir = temp("simulate-escape");
+    let target = dir.join("evil\u{1b}[2J");
+    let (out, code) = run(&[Path::new("simulate"), Path::new("wbci-agreed"), &target]);
+    assert_eq!(code, 0, "{out}");
+    assert!(!out.contains('\u{1b}') && out.contains("evil\u{FFFD}[2J"), "{out:?}");
+}
+
+#[test]
+fn every_scenario_replays_for_every_party() {
+    // sandbox/SR-004
+    let dir = temp("simulate-all");
+    for name in names() {
+        let target = dir.join(name);
+        let (out, code) = run(&[Path::new("simulate"), Path::new(name), &target]);
+        assert_eq!(code, 0, "{name}: {out}");
+        for party in ["ekpauf", "ekpabg", "netzbetreiber"] {
+            let (out, code) = run(&[Path::new("timeline"), &target, Path::new("--as"), Path::new(party)]);
+            assert_eq!(code, 0, "{name} as {party}:\n{out}");
+            assert!(out.contains("Findings: none"), "{name} as {party}:\n{out}");
+            assert!(
+                !out.contains("Refused") && !out.contains("OVERDUE") && !out.contains("Unreadable"),
+                "{name} as {party}:\n{out}"
+            );
+            // Only a party that takes no part in the scenario's interface sees nothing.
+            let blind = (name.starts_with("wbci-") && party == "netzbetreiber")
+                || (name.starts_with("spri-neu") || name.starts_with("spri-storno") || name == "spri-tv")
+                    && party == "ekpabg";
+            assert_eq!(timeline_lines(&out) == ["(empty)"], blind, "{name} as {party}:\n{out}");
+        }
+    }
+}
+
+#[test]
+fn simulate_starts_on_a_date_or_at_a_timestamp() {
+    let dir = temp("sim-start");
+    let (out, code) = run(&[
+        Path::new("simulate"),
+        Path::new("wechsel"),
+        &dir.join("date"),
+        Path::new("--start"),
+        Path::new("2027-12-23"),
+    ]);
+    assert_eq!(code, 0, "{out}");
+    let (out, code) = run(&[Path::new("timeline"), &dir.join("date"), Path::new("--as"), Path::new("ekpauf")]);
+    assert_eq!(code, 0, "{out}");
+    contains_all(&out, &["Do 23.12.2027 09:00 WBCI EKPauf → VA-KUE-MRN", "Findings: none"]);
+    let (out, code) = run(&[
+        Path::new("simulate"),
+        Path::new("wechsel"),
+        &dir.join("ts"),
+        Path::new("--start"),
+        Path::new("2027-12-23T08:00:00Z"),
+    ]);
+    assert_eq!(code, 0, "{out}");
+    let (out, code) =
+        run(&[Path::new("simulate"), Path::new("wechsel"), &dir.join("bad"), Path::new("--start"), Path::new("nope")]);
+    assert_eq!(code, 2, "{out}");
+    assert!(!dir.join("bad").exists());
+}
