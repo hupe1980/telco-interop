@@ -2,6 +2,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
+{% block head %}{% endblock %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#7a2e8f" media="(prefers-color-scheme: light)">
@@ -67,6 +68,7 @@
     </a>
     <nav class="topnav" aria-label="Main">
       <a href="{{ get_url(path='@/docs/_index.md') | safe }}"{% if cp is starting_with(pat="/docs/") %} aria-current="true"{% endif %}>Docs</a>
+      <a href="{{ get_url(path='@/playground.md') | safe }}"{% if cp is starting_with(pat="/playground/") %} aria-current="page"{% endif %}>Playground</a>
       <a href="{{ config.extra.api_url }}">API</a>
       <a href="{{ config.extra.crate_url }}">crates.io</a>
       <a href="{{ config.extra.repo }}">GitHub</a>

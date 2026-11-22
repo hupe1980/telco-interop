@@ -63,7 +63,24 @@ telco-interop timeline --as ekpauf switch/   # one switch replayed: timeline, fi
 ```
 
 It prints no personal data and exits 1 on an error, a finding or an overdue obligation.
-**[Guide](https://hupe1980.github.io/telco-interop/docs/start/command-line/)**
+**[Guide](https://hupe1980.github.io/telco-interop/docs/start/command-line/)** ·
+**[Try `read`, `check` and `code` in the browser](https://hupe1980.github.io/telco-interop/playground/)**
+
+## The command line's output as a library
+
+The `report` feature (not on by default, sans-I/O) gives what `read`, `check` and `code` print
+as text lines from bytes, for another front end — the site's playground uses it:
+
+```rust
+use telco_interop::report;
+
+let out = report::code("8103", true, true); // WBCI and S/PRI
+assert!(out.ok);
+assert_eq!(out.lines[0], "WBCI 8103 Rufnummer nicht geschaltet (RNG)");
+assert!(!report::read(b"<!DOCTYPE x><x/>").ok); // unreadable, with the TEQ code to answer with
+```
+
+The lines are value-free (kinds, ids, dates, codes) and control characters arrive as U+FFFD.
 
 Need only one interface? Depend on `wbci` or `spri` directly; they are the same code.
 

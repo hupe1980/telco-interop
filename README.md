@@ -44,7 +44,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 |---|---|---|---|
 | [`wbci`](crates/wbci) | WBCI 2.0 | provider ↔ provider: the § 59 TKG switch, number porting, the losing provider's check | complete |
 | [`spri`](crates/spri) | S/PRI 4.x | service provider ↔ network owner: open-access orders, faults, diagnostics, the provider switch | complete |
-| [`telco-interop`](crates/telco-interop) | both | one dependency for both, plus `Wechsel`: one switch across WBCI and S/PRI, and the `cli` command line | complete |
+| [`telco-interop`](crates/telco-interop) | both | one dependency for both, plus `Wechsel`: one switch across WBCI and S/PRI, the `cli` command line and its output as a library (`report`) | complete |
 | [`carrier-core`](crates/carrier-core) | — | the shared foundation: ids, working-day calendar, hardened XML; used through the crates above | internal |
 | [`wita-kit`](crates/wita-kit) | WITA | service provider ↔ Deutsche Telekom | name reserved |
 
@@ -58,6 +58,7 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 | **Processes** | a state machine per WBCI pre-agreement and per S/PRI order (Anlage 7 EPKs) |
 | **Across both** | `Wechsel`: one timeline, both interfaces' deadlines, six agreement checks |
 | **Command line** | read, check, explain codes, replay a switch: `brew install hupe1980/tap/telco-interop` or `cargo install telco-interop --features cli` |
+| **Playground** | [read, check and explain a payload in the browser](https://hupe1980.github.io/telco-interop/playground/): WebAssembly, nothing uploaded |
 | **Hardened** | no DTDs, bounded input, fuzzed, no panics, no `unsafe`, personal data redacted |
 
 ## Documentation
@@ -65,7 +66,8 @@ println!("{}", process.deadlines()[0]); // EKPabg: by Do 26.11.2026 23:59 — �
 - [Guides](https://hupe1980.github.io/telco-interop/): [how a switch works](https://hupe1980.github.io/telco-interop/docs/start/introduction/),
   [getting started](https://hupe1980.github.io/telco-interop/docs/start/getting-started/),
   [glossary](https://hupe1980.github.io/telco-interop/docs/start/glossary/),
-  [command line](https://hupe1980.github.io/telco-interop/docs/start/command-line/)
+  [command line](https://hupe1980.github.io/telco-interop/docs/start/command-line/),
+  [playground](https://hupe1980.github.io/telco-interop/playground/)
 - API: [telco-interop](https://docs.rs/telco-interop), [wbci](https://docs.rs/wbci), [spri](https://docs.rs/spri)
 - Example: `cargo run -p wbci --example switch`
 
@@ -77,7 +79,8 @@ just example     # the switch end to end
 just schema      # validate both writers against the official XSDs (fetched, pinned by SHA-256)
 just fuzz 60     # fuzz both readers (nightly + cargo-fuzz)
 just bless       # regenerate the golden XML fixtures after an intended change
-just site        # serve the documentation site (Zola)
+just playground  # build the site's playground module (needs the wasm32-unknown-unknown target)
+just site        # serve the documentation site (Zola), with the playground when the target is installed
 ```
 
 See [AGENTS.md](AGENTS.md) for the rules of the codebase and [SECURITY.md](SECURITY.md) for

@@ -2,20 +2,20 @@
 
 use std::path::PathBuf;
 
+use telco_interop::report::Payload;
 use telco_interop::spri::process::{Direction as SDir, Message as SMessage, Process as SProcess, Role as SRole};
 use telco_interop::wbci::process::Message as WMessage;
 use telco_interop::{
     Befund, Eintrag, Frist, FristDetail, Partei, Richtung, Schnittstelle, VorabstimmungsId, Wechsel, spri, wbci,
 };
 
-use crate::input::{self, Parsed};
-use crate::summary::{meldung_ext, meldung_va};
+use crate::input;
 
 /// One readable file.
 pub(crate) struct File {
     pub(crate) path: PathBuf,
     pub(crate) at: wbci::Timestamp,
-    pub(crate) payload: Parsed,
+    pub(crate) payload: Payload,
 }
 
 /// A file not replayed, and why.
@@ -63,7 +63,7 @@ pub(crate) fn replay(inputs: &[PathBuf], party: Partei, now: Option<wbci::Timest
     let mut files = Vec::new();
     for path in paths {
         match input::read_file(&path) {
-            Ok(payload) => files.push(File { at: payload.at(), path, payload }),
+            Ok(payload) => files.push(File { at: payload.sent_at(), path, payload }),
             Err(f) => unreadable.push(Note { path, reason: f.describe() }),
         }
     }
@@ -75,8 +75,8 @@ pub(crate) fn replay(inputs: &[PathBuf], party: Partei, now: Option<wbci::Timest
     if id.is_some() {
         for f in files {
             match f.payload {
-                Parsed::Wbci(p) => r.wbci_file(f.path, f.at, *p),
-                Parsed::Spri(p) => r.spri_file(f.path, f.at, *p),
+                Payload::Wbci(p) => r.wbci_file(f.path, f.at, *p),
+                Payload::Spri(p) => r.spri_file(f.path, f.at, *p),
             }
         }
     } else {
@@ -115,22 +115,22 @@ fn is_window(f: &Frist) -> bool {
 /// order's or AKM-PV's that carries one.
 fn switch_id(files: &[File]) -> Option<VorabstimmungsId> {
     let va = files.iter().find_map(|f| match &f.payload {
-        Parsed::Wbci(p) => match &**p {
+        Payload::Wbci(p) => match &**p {
             wbci::Payload::AnfrageRequest { anfrage: wbci::Anfrage::Vorabstimmung(va), .. } => Some(va.id.clone()),
             _ => None,
         },
-        Parsed::Spri(_) => None,
+        Payload::Spri(_) => None,
     });
     va.or_else(|| {
         files.iter().find_map(|f| match &f.payload {
-            Parsed::Spri(p) => match &**p {
+            Payload::Spri(p) => match &**p {
                 spri::Payload::AuftragRequest { auftrag, .. } => auftrag.geschaeftsfall.vorabstimmungs_id().cloned(),
                 spri::Payload::MeldungRequest { meldung, .. } if meldung.typ() == spri::Meldungstyp::AkmPv => {
-                    meldung_va(meldung).cloned()
+                    meldung.vorabstimmungs_id().cloned()
                 }
                 _ => None,
             },
-            Parsed::Wbci(_) => None,
+            Payload::Wbci(_) => None,
         })
     })
 }
@@ -264,9 +264,11 @@ impl Replay {
                 let id = auftrag.geschaeftsfall.vorabstimmungs_id().cloned();
                 (Some(auftrag.externe_auftragsnummer.clone()), id, SMessage::Auftrag(auftrag))
             }
-            spri::Payload::MeldungRequest { meldung, .. } => {
-                (Some(meldung_ext(&meldung).clone()), meldung_va(&meldung).cloned(), SMessage::Meldung(meldung))
-            }
+            spri::Payload::MeldungRequest { meldung, .. } => (
+                Some(meldung.externe_auftragsnummer().clone()),
+                meldung.vorabstimmungs_id().cloned(),
+                SMessage::Meldung(meldung),
+            ),
             spri::Payload::AuftragResponse { quittung, .. } | spri::Payload::MeldungResponse { quittung, .. } => {
                 (quittung.externe_auftragsnummer.clone(), None, SMessage::Teq(quittung))
             }

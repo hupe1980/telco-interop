@@ -143,6 +143,9 @@ match Payload::from_xml(xml.as_bytes()) {
 ```
 {% </rust> %}
 
+`meldung.externe_auftragsnummer()` names the order a message belongs to, whatever its type;
+`meldung.vorabstimmungs_id()` gives the Vorabstimmungs-ID where the type carries one.
+
 ## One foundation with WBCI
 
 `spri::VorabstimmungsId`, `LineId` and `CarrierCode` are the same types as in `wbci` (both

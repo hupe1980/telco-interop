@@ -36,6 +36,60 @@ impl Meldung {
     pub fn codes(&self) -> Vec<&Meldungscode> {
         self.inhalt.codes()
     }
+
+    /// The order number the message refers to (`externeAuftragsnummer`, in every message type).
+    #[must_use]
+    pub const fn externe_auftragsnummer(&self) -> &ExterneAuftragsnummer {
+        use Meldungsinhalt as I;
+        match &self.inhalt {
+            I::Qeb(x) => &x.externe_auftragsnummer,
+            I::Abm(x) => &x.externe_auftragsnummer,
+            I::Abbm(x) => &x.externe_auftragsnummer,
+            I::Erlm(x) => &x.externe_auftragsnummer,
+            I::Entm(x) => &x.externe_auftragsnummer,
+            I::Vzm(x) => &x.externe_auftragsnummer,
+            I::Tam(x) | I::Mtam(x) => &x.externe_auftragsnummer,
+            I::Kdle(x) => &x.externe_auftragsnummer,
+            I::ZwmLe(x) => &x.externe_auftragsnummer,
+            I::ZwmAg(x) => &x.externe_auftragsnummer,
+            I::TbkLe(x) | I::TbkAg(x) => &x.externe_auftragsnummer,
+            I::AkmPv(x) => &x.externe_auftragsnummer,
+            I::RuemPv(x) => &x.externe_auftragsnummer,
+            I::AbmPv(x) => &x.externe_auftragsnummer,
+            I::ErlmPv(x) => &x.externe_auftragsnummer,
+            I::EntmPv(x) => &x.externe_auftragsnummer,
+            I::AbbmPv(x) => &x.externe_auftragsnummer,
+            I::ErlmK(x) => &x.externe_auftragsnummer,
+        }
+    }
+
+    /// The Vorabstimmungs-ID the message carries, if its type has one and it is given
+    /// (XSD 4.00.03: QEB, ABM, ABBM, ERLM, ENTM, VZM, TAM, MTAM, ZWM-LE, AKM-PV, RUEM-PV, ERLM-K).
+    #[must_use]
+    pub const fn vorabstimmungs_id(&self) -> Option<&VorabstimmungsId> {
+        use Meldungsinhalt as I;
+        match &self.inhalt {
+            I::Qeb(x) => x.vorabstimmungs_id.as_ref(),
+            I::Abm(x) => x.vorabstimmungs_id.as_ref(),
+            I::Abbm(x) => x.vorabstimmungs_id.as_ref(),
+            I::Erlm(x) => x.vorabstimmungs_id.as_ref(),
+            I::Entm(x) => x.vorabstimmungs_id.as_ref(),
+            I::Vzm(x) => x.vorabstimmungs_id.as_ref(),
+            I::Tam(x) | I::Mtam(x) => x.vorabstimmungs_id.as_ref(),
+            I::ZwmLe(x) => x.vorabstimmungs_id.as_ref(),
+            I::AkmPv(x) => x.vorabstimmungs_id.as_ref(),
+            I::RuemPv(x) => x.vorabstimmungs_id.as_ref(),
+            I::ErlmK(x) => x.vorabstimmungs_id.as_ref(),
+            I::Kdle(_)
+            | I::ZwmAg(_)
+            | I::TbkLe(_)
+            | I::TbkAg(_)
+            | I::AbmPv(_)
+            | I::ErlmPv(_)
+            | I::EntmPv(_)
+            | I::AbbmPv(_) => None,
+        }
+    }
 }
 
 /// The kind of order a message refers to (`AuftragstypType`).

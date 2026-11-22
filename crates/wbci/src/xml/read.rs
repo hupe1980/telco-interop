@@ -156,6 +156,7 @@ impl From<XmlError> for ReadError {
             XmlErrorKind::XsiType(why) => ReadErrorKind::XsiType(why),
             XmlErrorKind::Value(v) => ReadErrorKind::Value(v),
             XmlErrorKind::Invalid(what) => ReadErrorKind::Invalid(what),
+            XmlErrorKind::Malformed(why) => ReadErrorKind::Malformed(why),
             other => ReadErrorKind::Malformed(other.to_string()),
         };
         Self { path: e.path, offset: e.offset, kind }

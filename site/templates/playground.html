@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{#- Everything runs in the browser: the module and this script come from the site, nothing else is
+    requested, and the policy below forbids other origins, inline script and form submission. -#}
+{% block head %}<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">{% endblock %}
+{% block content %}
+<div class="wrap playground">
+  <h1>{{ page.title }}</h1>
+  {% if page.description %}<p class="lede">{{ page.description }}</p>{% endif %}
+  <div class="prose">{{ page.content | safe }}</div>
+
+  <noscript><p class="pg-note">The playground needs JavaScript and WebAssembly. Without them, use the
+    <a href="{{ get_url(path='@/docs/start/command-line.md') | safe }}">command line</a>: <code>telco-interop read</code>, <code>check</code>, <code>code</code>.</p></noscript>
+
+  <section class="pg-panel" aria-labelledby="pg-payload-title">
+    <h2 id="pg-payload-title">Payload</h2>
+    <div class="pg-row">
+      <label for="pg-example">Example</label>
+      <select id="pg-example" disabled><option value="">Choose a synthetic example…</option></select>
+      <label for="pg-file">or open a file</label>
+      <input id="pg-file" type="file" accept=".xml,text/xml,application/xml" disabled>
+    </div>
+    <label for="pg-input" class="pg-label">WBCI or S/PRI payload, bare or in a SOAP envelope (paste, or drop a file here)</label>
+    <textarea id="pg-input" rows="14" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <div class="pg-row">
+      <button id="pg-read" class="btn btn-primary" type="button" disabled>Read</button>
+      <button id="pg-check" class="btn" type="button" disabled>Check</button>
+    </div>
+  </section>
+
+  <section class="pg-panel" aria-labelledby="pg-code-title">
+    <h2 id="pg-code-title">Code lookup</h2>
+    <div class="pg-row">
+      <label for="pg-code">Meldungscode</label>
+      <input id="pg-code" type="text" inputmode="text" size="8" maxlength="64" placeholder="8103" autocomplete="off" disabled>
+      <label for="pg-scope">in</label>
+      <select id="pg-scope" disabled><option value="0">WBCI and S/PRI</option><option value="1">WBCI</option><option value="2">S/PRI</option></select>
+      <button id="pg-lookup" class="btn" type="button" disabled>Look up</button>
+    </div>
+  </section>
+
+  <section class="pg-panel" aria-labelledby="pg-result-title">
+    <h2 id="pg-result-title">Result</h2>
+    <div aria-live="polite" aria-atomic="true">
+      <p id="pg-status" class="pg-status">Loading the module…</p>
+      <pre id="pg-output" class="pg-output" tabindex="0" aria-label="Result lines"></pre>
+    </div>
+  </section>
+</div>
+<script type="module" src="{{ get_url(path='playground/playground.js') | safe }}"></script>
+{% endblock %}

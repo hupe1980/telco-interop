@@ -4,7 +4,7 @@ default:
     @just --list --unsorted
 
 # Everything CI runs, except fuzzing.
-ci: fmt-check boundary lint test msrv deny package-check site-check
+ci: fmt-check boundary lint test msrv deny package-check site-check playground-check
     @echo "CI gate passed."
 
 # No planning ids and no unpublished paths in published files.
@@ -69,7 +69,29 @@ fuzz SECONDS="60":
 example:
     cargo run -p wbci --example switch
 
-site:
+# The site's playground module: telco_interop::report as WebAssembly (rustup target add wasm32-unknown-unknown).
+playground:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cargo clippy -p playground --target wasm32-unknown-unknown -- -D warnings
+    cargo build -p playground --target wasm32-unknown-unknown --profile playground
+    mkdir -p site/static/playground
+    cp target/wasm32-unknown-unknown/playground/playground.wasm site/static/playground/playground.wasm
+    size=$(wc -c < site/static/playground/playground.wasm | tr -d ' ')
+    echo "playground.wasm: $size bytes"
+    if [ "$size" -gt 1572864 ]; then echo "playground.wasm is larger than 1.5 MB"; exit 1; fi
+
+# The playground module when the wasm32 target is installed; otherwise a note (the site workflow always builds it).
+playground-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if rustup target list --installed 2>/dev/null | grep -qx wasm32-unknown-unknown; then
+      just playground
+    else
+      echo "skipped: the playground needs 'rustup target add wasm32-unknown-unknown'"
+    fi
+
+site: playground-check
     cd site && zola serve
 
 # Zola check, and every Rust sample wrapped so rustdoc's hidden lines stay hidden on the site.

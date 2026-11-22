@@ -163,3 +163,9 @@ fn errors_never_echo_personal_data() {
     let text = err.to_string();
     assert!(!text.contains("Muster"), "{text}");
 }
+
+#[test]
+fn a_malformed_document_names_the_problem_once() {
+    let err = wbci::Payload::from_xml(b"<a><b></a>").unwrap_err();
+    assert_eq!(err.to_string().matches("malformed XML").count(), 1, "{err}");
+}

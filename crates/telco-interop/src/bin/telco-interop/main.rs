@@ -4,7 +4,8 @@
 //! The binary is the I/O boundary of the sans-I/O crates: it reads the files it is given and
 //! prints to standard output; it writes no file, opens no connection and reads no clock (the
 //! replay's "now" is `--now` or the latest control timestamp). Every printed line passes
-//! [`out`], which replaces control characters taken from the input; summaries print kinds,
+//! [`out`], which replaces control characters taken from the input. What `read`, `check` and
+//! `code` print comes from `telco_interop::report` (shared with the site's playground): kinds,
 //! ids, dates and codes, never names, addresses, phone numbers or free text.
 
 use std::fmt::Display;
@@ -13,13 +14,10 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use telco_interop::{Partei, spri, wbci};
+use telco_interop::{Partei, report, wbci};
 
 mod input;
-mod summary;
 mod timeline;
-
-use input::Parsed;
 
 /// Read, check and explain WBCI and S/PRI files; replay a provider switch.
 #[derive(Parser)]
@@ -99,13 +97,9 @@ fn parse_now(s: &str) -> Result<wbci::Timestamp, String> {
 /// Prints one line. Every character from the input passes here: control characters (C0, DEL,
 /// C1) become U+FFFD, so no file can move the cursor, clear the screen or hide output.
 fn out(line: impl Display) {
-    let text = sanitize(&line.to_string());
+    let text = report::sanitize(&line.to_string());
     // A closed pipe (`| head`) ends the output; there is nothing left to report it to.
     let _ = writeln!(std::io::stdout().lock(), "{text}");
-}
-
-fn sanitize(s: &str) -> String {
-    s.chars().map(|c| if c.is_control() { '\u{FFFD}' } else { c }).collect()
 }
 
 fn main() -> ExitCode {
@@ -119,141 +113,47 @@ fn main() -> ExitCode {
     if ok { ExitCode::SUCCESS } else { ExitCode::FAILURE }
 }
 
-// -- read -----------------------------------------------------------------------------------
+// -- read, check ----------------------------------------------------------------------------
 
-fn read(files: &[PathBuf]) -> bool {
+/// Prints each file's path and the lines of `render` on its bytes, indented; an unopenable file
+/// is `unreadable` with the reason.
+fn per_file(files: &[PathBuf], render: fn(&[u8]) -> report::Output) -> bool {
     let mut ok = true;
     for path in files {
         out(path.display());
-        match input::read_file(path) {
-            Ok(p) => {
-                for (label, value) in summary::summary(&p) {
-                    out(format_args!("  {label}: {value}"));
+        match input::read_bytes(path) {
+            Ok(bytes) => {
+                let r = render(&bytes);
+                ok &= r.ok;
+                for line in &r.lines {
+                    out(format_args!("  {line}"));
                 }
             }
-            Err(f) => {
+            Err(reason) => {
                 ok = false;
-                out(format_args!("  unreadable: {}", f.describe()));
+                out(format_args!("  unreadable: {reason}"));
             }
         }
     }
     ok
 }
 
-// -- check ----------------------------------------------------------------------------------
+fn read(files: &[PathBuf]) -> bool {
+    per_file(files, report::read)
+}
 
 fn check(files: &[PathBuf]) -> bool {
-    let mut ok = true;
-    for path in files {
-        out(path.display());
-        let payload = match input::read_file(path) {
-            Ok(p) => p,
-            Err(f) => {
-                ok = false;
-                out(format_args!("  unreadable: {}", f.describe()));
-                continue;
-            }
-        };
-        // Date rules are judged at the file's own control timestamp: the moment it was sent.
-        let sent_at = payload.at();
-        let (interface, issues) = match &payload {
-            Parsed::Wbci(p) => (
-                "WBCI",
-                match &**p {
-                    wbci::Payload::AnfrageRequest { anfrage, .. } => {
-                        anfrage.issues_at(sent_at, &wbci::Calendar::wbci()).iter().map(wbci_line).collect()
-                    }
-                    wbci::Payload::MeldungRequest { meldung, .. } => {
-                        meldung.issues(None).iter().map(wbci_line).collect()
-                    }
-                    wbci::Payload::AnfrageResponse { quittung, .. }
-                    | wbci::Payload::MeldungResponse { quittung, .. } => {
-                        quittung.issues().iter().map(wbci_line).collect()
-                    }
-                },
-            ),
-            Parsed::Spri(p) => (
-                "S/PRI",
-                match &**p {
-                    spri::Payload::AuftragRequest { auftrag, .. } => {
-                        auftrag.issues_at(sent_at, &spri::Calendar::werktage()).iter().map(spri_line).collect()
-                    }
-                    spri::Payload::MeldungRequest { meldung, .. } => meldung.issues().iter().map(spri_line).collect(),
-                    spri::Payload::AuftragResponse { quittung, .. }
-                    | spri::Payload::MeldungResponse { quittung, .. } => {
-                        quittung.issues().iter().map(spri_line).collect::<Vec<_>>()
-                    }
-                },
-            ),
-        };
-        if issues.is_empty() {
-            out(format_args!("  {interface}: no issues"));
-        }
-        for (error, line) in &issues {
-            if *error {
-                ok = false;
-            }
-            out(format_args!("  {line}"));
-        }
-    }
-    ok
-}
-
-/// Whether the issue is an error, and its line.
-fn wbci_line(i: &wbci::Issue) -> (bool, String) {
-    (i.severity == wbci::Severity::Error, i.to_string())
-}
-
-/// Whether the issue is an error, and its line.
-fn spri_line(i: &spri::Issue) -> (bool, String) {
-    (i.severity == spri::Severity::Error, i.to_string())
+    per_file(files, report::check)
 }
 
 // -- code -----------------------------------------------------------------------------------
 
 fn code_cmd(code: &str, in_wbci: bool, in_spri: bool) -> bool {
-    let mut known = false;
-    if in_wbci {
-        let c = wbci::Meldungscode::parse(code);
-        if c.text().is_some() {
-            known = true;
-            out(format_args!("WBCI {c}"));
-            if let Some(short) = c.short() {
-                out(format_args!("  short name: {short}"));
-            }
-            let mut typen: Vec<wbci::Meldungstyp> = Vec::new();
-            for t in c.meldungstypen() {
-                if !typen.contains(&t) {
-                    typen.push(t);
-                }
-            }
-            for t in typen {
-                let cases: Vec<&str> =
-                    wbci::Geschaeftsfall::ALL.iter().filter(|g| c.applies(t, **g)).map(|g| g.as_str()).collect();
-                out(format_args!("  {t} in {}", cases.join(", ")));
-            }
-        } else {
-            out(format_args!("WBCI: {code} is not a WBCI code"));
-        }
+    let r = report::code(code, in_wbci, in_spri);
+    for line in &r.lines {
+        out(line);
     }
-    if in_spri {
-        let c = spri::Meldungscode::parse(code);
-        if c.text().is_some() {
-            known = true;
-            out(format_args!("S/PRI {c}"));
-            let typen: Vec<&str> = c.meldungstypen().map(spri::Meldungstyp::as_str).collect();
-            if !typen.is_empty() {
-                out(format_args!("  message types: {}", typen.join(", ")));
-            }
-            let cases: Vec<&str> = c.geschaeftsfaelle().map(spri::GeschaeftsfallCode::as_str).collect();
-            if !cases.is_empty() {
-                out(format_args!("  business cases: {}", cases.join(", ")));
-            }
-        } else {
-            out(format_args!("S/PRI: {code} is not an S/PRI code"));
-        }
-    }
-    known
+    r.ok
 }
 
 // -- timeline -------------------------------------------------------------------------------

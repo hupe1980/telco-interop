@@ -4,6 +4,37 @@ All notable changes to the crates in this repository. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer, with
 breaking changes allowed before 1.0.
 
+## telco-interop 0.1.2 — 2026-11-22
+
+### Added
+
+- `telco_interop::report` (feature `report`, enabled by `cli`): the lines `read`, `check` and
+  `code` print, from bytes and value-free, for another front end; `Payload::parse` detects the
+  interface and gives the TEQ code of an unreadable payload. The command line prints through it.
+- A [playground](https://hupe1980.github.io/telco-interop/playground/) on the site, built from
+  `report`: `read`, `check` and `code` in the browser as WebAssembly; nothing is uploaded.
+
+## spri 0.1.2 — 2026-11-22
+
+### Added
+
+- `Meldung::externe_auftragsnummer` and `Meldung::vorabstimmungs_id`: the order number of any
+  message type, and its Vorabstimmungs-ID where the type carries one.
+
+### Fixed
+
+- A read error for malformed XML says „malformed XML" once, not twice.
+
+## wbci 0.1.2 — 2026-11-22
+
+### Fixed
+
+- A read error for malformed XML says „malformed XML" once, not twice.
+
+## carrier-core 0.1.2 — 2026-11-22
+
+Released with the others; no changes.
+
 ## spri 0.1.1 — 2026-11-22
 
 ### Added

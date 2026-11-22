@@ -42,3 +42,6 @@ rustc-ice-*.txt
 
 # Zola build output
 /site/public/
+
+# The playground module, built by `just playground` (and in the site workflow)
+/site/static/playground/*.wasm

@@ -17,9 +17,11 @@ default = ["wbci", "spri"]
 wbci = ["dep:wbci"]
 ## S/PRI 4.x: service provider ↔ network owner, open-access orders.
 spri = ["dep:spri"]
+## `telco_interop::report`: what `read`, `check` and `code` print, as text lines from bytes (sans-I/O).
+report = ["wbci", "spri"]
 ## The `telco-interop` command line (read, check, code, timeline): `cargo install telco-interop --features cli`.
 ## Pulls clap; the library itself stays sans-I/O, all I/O lives in the binary.
-cli = ["wbci", "spri", "dep:clap"]
+cli = ["report", "dep:clap"]
 
 [dependencies]
 carrier-core = { workspace = true }

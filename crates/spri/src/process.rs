@@ -515,29 +515,6 @@ const fn receiver_of(typ: Meldungstyp) -> Role {
     }
 }
 
-fn ext_of(m: &Meldungsinhalt) -> &ExterneAuftragsnummer {
-    match m {
-        Meldungsinhalt::Qeb(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Abm(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Abbm(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Erlm(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Entm(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Vzm(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Tam(x) | Meldungsinhalt::Mtam(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::Kdle(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::ZwmLe(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::ZwmAg(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::TbkLe(x) | Meldungsinhalt::TbkAg(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::AkmPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::RuemPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::AbmPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::ErlmPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::EntmPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::AbbmPv(x) => &x.externe_auftragsnummer,
-        Meldungsinhalt::ErlmK(x) => &x.externe_auftragsnummer,
-    }
-}
-
 const fn meldung_has_attachment(m: &Meldungsinhalt) -> bool {
     match m {
         Meldungsinhalt::Erlm(x) => x.anlage.is_some(),
@@ -1063,7 +1040,7 @@ impl Process {
         if m.auftragstyp.geschaeftsfall != self.fall {
             return refuse(format!("a {typ} of another business case"));
         }
-        let ext = ext_of(&m.inhalt);
+        let ext = m.externe_auftragsnummer();
         if is_leg(typ) {
             if self.core.pv_ext.as_ref().is_some_and(|e| e != ext) {
                 return refuse(format!("a {typ} refers to another provider switch"));

@@ -11,6 +11,11 @@ The `telco-interop` command puts the library in front of files: what a message i
 is valid, what a code means and where a switch stands. It reads only the files you name and
 prints no personal data — names, addresses, numbers and free text never appear in its output.
 
+To try `read`, `check` and `code` without installing anything, use the
+[playground](@/playground.md): the same lines, computed in your browser. Both print through
+[`telco_interop::report`](https://docs.rs/telco-interop/latest/telco_interop/report/) (feature
+`report`), which gives those lines from bytes to any other front end.
+
 ## Install
 
 ### Homebrew

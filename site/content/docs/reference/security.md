@@ -21,7 +21,7 @@ reader both interfaces share is built for hostile input.
 | A receipt code for every error | `ReadError::teq_code()`: 0993 for a wrong major release, 0995 for everything else |
 | No values in errors | an error names the element path and byte offset, never the content |
 | Never a panic | no `unwrap`, `expect`, `panic!` or indexing outside tests (Clippy denies them); two fuzz targets run on every push (2 minutes each) |
-| No `unsafe` | `unsafe_code = "forbid"` across the workspace |
+| No `unsafe` | `unsafe_code = "forbid"` in every published crate; the unpublished playground module has no `unsafe` block or `unsafe fn`, only the `#[unsafe(no_mangle)]` attribute its WebAssembly exports need |
 
 The [WBCI XML guide](@/docs/wbci/xml.md#untrusted-input) shows the limits in code and lists
 which input is refused with which receipt code.
@@ -33,6 +33,13 @@ print redacted in `Debug` (`Nachname(<redacted, 10 chars>)`), so logging a value
 the customer; `Display` and `as_str()` give the value when you need it. Errors, validation
 issues, the losing provider's findings, the switch timeline and its findings carry ids, dates,
 message types and codes only.
+
+## The playground
+
+The [playground](@/playground.md) runs the crates in your browser as WebAssembly. Its script
+fetches only the module and sends nothing; the page's Content-Security-Policy allows no other
+origin, no inline script and no form submission. Its output is that of the command line,
+without personal data.
 
 ## Attachments
 

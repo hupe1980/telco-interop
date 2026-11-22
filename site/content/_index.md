@@ -29,7 +29,7 @@ title = "Safe with hostile input"
 text = "No DTDs, no entity expansion; size, depth, text and every repetition bounded; fuzzed; never a panic. Personal data never appears in <code>Debug</code>, errors or issues."
 [[extra.features]]
 title = "A command line for the files"
-text = "<code>brew install hupe1980/tap/telco-interop</code>: read and check message files, explain a code, replay a switch from one party's view with findings and deadlines. No personal data in its output."
+text = "<code>brew install hupe1980/tap/telco-interop</code>: read and check message files, explain a code, replay a switch from one party's view with findings and deadlines. No personal data in its output. <code>read</code>, <code>check</code> and <code>code</code> also run in the browser playground, with nothing uploaded."
 [[extra.features]]
 title = "No transport, no lock-in"
 text = "The crates read and write the payloads, bare or in a SOAP 1.1 envelope. HTTPS, WS-Security, storage and your clock stay in your application."
@@ -49,7 +49,7 @@ ok = true
 [[extra.crates]]
 name = "telco-interop"
 interface = "both"
-between = "one dependency for both, plus Wechsel: one switch across WBCI and S/PRI, and the command line"
+between = "one dependency for both, plus Wechsel: one switch across WBCI and S/PRI, the command line and its output as a library"
 status = "complete"
 ok = true
 [[extra.crates]]
@@ -74,6 +74,9 @@ a = "In German time (Europe/Berlin, compiled in). WBCI working days (AT) are Mon
 [[extra.faq]]
 q = "Can I use only WBCI, or only S/PRI?"
 a = "Yes. Depend on the wbci or the spri crate directly, or on telco-interop with one feature turned off. The identifiers both interfaces share (Vorabstimmungs-ID, LineID, carrier code) are the same types in both crates, so adding the other one later needs no conversion."
+[[extra.faq]]
+q = "Can I try it without installing anything?"
+a = "Yes. The playground reads and checks a WBCI or S/PRI payload and explains a Meldungscode in your browser, with the same output as the command line. The crates run there as WebAssembly: nothing is uploaded, and there are no cookies or analytics."
 [[extra.faq]]
 q = "What about personal data?"
 a = "Names, addresses, phone numbers, e-mail addresses, free text and attachment content print redacted in Debug output, and errors, validation issues, timelines and findings never contain them. The losing provider's check explains its decision without personal data, so the explanation can be logged and shared."

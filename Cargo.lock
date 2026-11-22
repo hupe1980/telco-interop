@@ -71,7 +71,7 @@ checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
 name = "carrier-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "jiff",
  "quick-xml",
@@ -298,6 +298,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
+name = "playground"
+version = "0.1.2"
+dependencies = [
+ "telco-interop",
+]
+
+[[package]]
 name = "portable-atomic"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -468,7 +475,7 @@ dependencies = [
 
 [[package]]
 name = "spri"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "carrier-core",
  "jiff",
@@ -490,7 +497,7 @@ dependencies = [
 
 [[package]]
 name = "telco-interop"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "carrier-core",
  "clap",
@@ -584,7 +591,7 @@ dependencies = [
 
 [[package]]
 name = "wbci"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "carrier-core",
  "jiff",
@@ -619,4 +626,4 @@ dependencies = [
 
 [[package]]
 name = "wita-kit"
-version = "0.1.1"
+version = "0.1.2"

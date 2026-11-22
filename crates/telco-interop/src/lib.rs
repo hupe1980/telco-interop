@@ -37,6 +37,12 @@
 //! the AKM-TR takes over, the dates, postponement in WBCI first, a WBCI cancellation reaching
 //! S/PRI, completion within a working day of the switch date). See the [`wechsel`] module.
 //!
+//! ## The command line's output as a library: [`report`]
+//!
+//! [`report`] (feature `report`, not on by default) turns payload bytes into the lines
+//! `telco-interop read`, `check` and `code` print — value-free, control characters replaced —
+//! for another front end; the site's in-browser playground uses it.
+//!
 //! Need only one interface? Depend on [`wbci`](https://docs.rs/wbci) or
 //! [`spri`](https://docs.rs/spri) directly, or turn the other feature off:
 //! `telco-interop = { version = "0.1", default-features = false, features = ["spri"] }`.
@@ -63,6 +69,10 @@ pub use spri;
 #[cfg_attr(docsrs, doc(cfg(all(feature = "wbci", feature = "spri"))))]
 pub mod wechsel;
 
+#[cfg(feature = "report")]
+#[cfg_attr(docsrs, doc(cfg(feature = "report")))]
+pub mod report;
+
 #[cfg(all(feature = "wbci", feature = "spri"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "wbci", feature = "spri"))))]
 #[doc(inline)]
@@ -71,6 +81,8 @@ pub use wechsel::{Aktion, Befund, Eintrag, Frist, FristDetail, Mismatch, Partei,
 /// The README and the site's cross-interface page, compiled and run as a doctest so it cannot drift.
 #[cfg(all(doctest, feature = "wbci", feature = "spri"))]
 mod site_guides {
+    // The README's samples include `report`.
+    #[cfg(feature = "report")]
     #[doc = include_str!("../README.md")]
     struct Readme;
     #[doc = include_str!("../../../site/content/docs/across-both/one-switch.md")]

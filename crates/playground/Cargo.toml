@@ -1,0 +1,35 @@
+[package]
+name         = "playground"
+description  = "The site's in-browser playground: telco_interop::report compiled to WebAssembly. Not published."
+publish      = false
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+authors.workspace      = true
+license.workspace      = true
+repository.workspace   = true
+
+[lib]
+# cdylib: the .wasm for the site; rlib: the native tests of the same functions.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+telco-interop = { path = "../telco-interop", default-features = false, features = ["report"] }
+
+# The workspace lints, except `unsafe_code`: `deny` instead of `forbid`, so that each exported
+# function can allow the `#[unsafe(no_mangle)]` attribute a WebAssembly export needs. This crate
+# has no `unsafe` block and no `unsafe fn` (checked by tests/playground.rs).
+[lints.rust]
+unsafe_code                   = "deny"
+missing_docs                  = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub               = "warn"
+rust_2018_idioms              = { level = "warn", priority = -1 }
+
+[lints.clippy]
+pedantic         = { level = "warn", priority = -1 }
+indexing_slicing = "warn"
+unwrap_used      = "warn"
+expect_used      = "warn"
+panic            = "warn"
+assert_is_empty  = "allow"
